@@ -30,7 +30,7 @@ const paymentMethods = [
     name: "MTN Mobile Money",
     description: "Pay with MTN MoMo mobile wallet",
     logo: "/logos/mtn3.png",
-    href: "/checkout/mtn-mobile-money",
+    href: "/checkout/mtn-money",
   },
 ];
 

@@ -2,9 +2,21 @@
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function PaypalButton() {
+interface PaypalButtonProps {
+  amount?: string;
+  currency?: string;
+}
+
+export default function PaypalButton({
+  amount = "10.00",
+  currency = "USD",
+}: PaypalButtonProps) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
+  const router = useRouter();
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (!clientId) {
     return <p className="text-red-500">PayPal Client ID is missing!</p>;
@@ -14,90 +26,86 @@ export default function PaypalButton() {
     <div className="max-w-md mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">Complete Your Payment</h2>
 
+      {status === "success" && (
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+          ✅ Payment successful! Redirecting...
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+          ❌ {errorMessage}
+        </div>
+      )}
+
       <PayPalScriptProvider
         options={{
           clientId: clientId,
-          currency: "USD",
+          currency: currency,
         }}
       >
         <PayPalButtons
-          style={{ 
+          style={{
             layout: "vertical",
             color: "blue",
             shape: "rect",
-            label: "paypal"
+            label: "paypal",
           }}
           createOrder={async () => {
-            console.log("=== CREATING ORDER ===");
-            
             try {
               const res = await fetch("/api/paypal/create-order", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount, currency }),
               });
 
-              console.log("Response status:", res.status);
-
               if (!res.ok) {
-                const errorText = await res.text();
-                console.error("Create order failed:", errorText);
                 throw new Error("Failed to create order");
               }
 
               const data = await res.json();
-              console.log("=== ORDER DATA RECEIVED ===", data);
-              console.log("Order ID being returned:", data.id);
 
               if (!data.id) {
-                console.error("No order ID in response!");
                 throw new Error("No order ID received from server");
               }
 
-              // RETURN THE ORDER ID AS A STRING
               return data.id;
-              
             } catch (error) {
-              console.error("=== CREATE ORDER ERROR ===", error);
-              alert("Failed to create order: " + error);
+              setStatus("error");
+              setErrorMessage("Failed to initiate payment. Please try again.");
               throw error;
             }
           }}
           onApprove={async (data) => {
-            console.log("=== PAYMENT APPROVED ===");
-            console.log("Order ID from PayPal:", data.orderID);
-
             try {
               const response = await fetch("/api/paypal/capture-order", {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ 
-                  orderID: data.orderID 
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderID: data.orderID }),
               });
 
               const result = await response.json();
-              console.log("=== CAPTURE RESULT ===", result);
 
               if (response.ok) {
-                alert("Payment successful! ✅");
+                setStatus("success");
+                setTimeout(() => {
+                  router.push("/payment/success");
+                }, 2000);
               } else {
-                alert("Payment capture failed: " + JSON.stringify(result));
+                setStatus("error");
+                setErrorMessage("Payment capture failed. Please contact support.");
               }
             } catch (err) {
-              console.error("=== CAPTURE ERROR ===", err);
-              alert("Error capturing payment: " + err);
+              setStatus("error");
+              setErrorMessage("An unexpected error occurred.");
             }
           }}
-          onError={(err) => {
-            console.error("=== PAYPAL BUTTON ERROR ===", err);
-            alert("PayPal Error: " + JSON.stringify(err));
+          onError={() => {
+            setStatus("error");
+            setErrorMessage("PayPal encountered an error. Please try again.");
           }}
           onCancel={() => {
-            console.log("Payment cancelled by user");
+            setStatus("idle");
           }}
         />
       </PayPalScriptProvider>
