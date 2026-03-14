@@ -18,11 +18,11 @@ export interface ITransaction extends Document {
   currency: string;
 
   // Amounts
-  merchantAmount: number;   // what merchant requested
-  nexapayFee: number;       // NexaPay's cut
-  grossAmount: number;      // what customer paid (merchantAmount + nexapayFee)
-  providerFee: number;      // NotchPay/PayPal/Stripe's cut (estimated)
-  netAmount: number;        // what merchant receives
+  merchantAmount: number;   
+  nexapayFee: number;       
+  grossAmount: number;      
+  providerFee: number;      
+  netAmount: number;        
 
   // Customer
   customerName: string;

@@ -1,36 +1,58 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import crypto from "crypto";
 
-interface IUser extends Document {
+export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
-  apiKey?: string;
-  id: string;
+  image?: string;
+  role: "user" | "admin";
+  apiKey: string;
+  merchantStatus: "unverified" | "pending" | "approved" | "rejected";
+  business?: {
+    companyName: string;
+    businessType: string;
+    country: string;
+    phone: string;
+    website?: string;
+    description?: string;
+    registeredAt: Date;
+  };
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const UserSchema: Schema<IUser> = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const UserSchema = new Schema<IUser>(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String },
+    image: { type: String },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    apiKey: {
+      type: String,
+      unique: true,
+      default: () => "npk_live_" + crypto.randomBytes(24).toString("hex"),
+    },
+    merchantStatus: {
+      type: String,
+      enum: ["unverified", "pending", "approved", "rejected"],
+      default: "unverified",
+    },
+    business: {
+      companyName: { type: String },
+      businessType: { type: String },
+      country: { type: String },
+      phone: { type: String },
+      website: { type: String },
+      description: { type: String },
+      registeredAt: { type: Date, default: Date.now },
+    },
+    rejectionReason: { type: String },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: false,
-  },
-  apiKey: {
-    type: String,
-    required: false,
-    unique: true,
-    sparse: true, // allows multiple null values (for OAuth users before key generation)
-  },
-});
+  { timestamps: true }
+);
 
-const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
-
+const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 export default User;
