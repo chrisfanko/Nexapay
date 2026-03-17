@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import Transaction from "@/models/transaction";
+import { deliverWebhook } from "@/lib/webhook";
 
 export async function GET(req: NextRequest) {
   const reference = req.nextUrl.searchParams.get("reference");
 
-  // 1. Validate reference
   if (!reference) {
-    return NextResponse.json(
-      { error: "No reference provided" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "No reference provided" }, { status: 400 });
   }
 
-  // 2. Verify with NotchPay
+  // 1. Verify with NotchPay
   let notchpayData;
   try {
     const response = await fetch(
@@ -43,7 +40,6 @@ export async function GET(req: NextRequest) {
   }
 
   const tx = notchpayData?.transaction;
-
   if (!tx) {
     return NextResponse.json(
       { error: "Invalid response from payment provider." },
@@ -53,29 +49,24 @@ export async function GET(req: NextRequest) {
 
   const isComplete = tx.status === "complete";
 
-  // 3. Update the existing pending transaction in MongoDB
+  // 2. Update transaction in MongoDB
+  let savedTransaction = null;
   try {
     await connectToDatabase();
 
     const existing = await Transaction.findOne({ reference });
 
     if (existing) {
-      // Update the pending transaction with final status
-      await Transaction.findOneAndUpdate(
+      savedTransaction = await Transaction.findOneAndUpdate(
         { reference },
         {
           status: isComplete ? "complete" : "failed",
-          failureReason: isComplete
-            ? undefined
-            : tx.message || "Payment was not completed",
-        }
+          failureReason: isComplete ? undefined : tx.message || "Payment was not completed",
+        },
+        { new: true }
       );
-
-      console.log(`Transaction ${reference} updated to "${isComplete ? "complete" : "failed"}"`);
     } else {
-      // Fallback: if pending transaction wasn't saved at initialization,
-      // create it now with whatever info we have from NotchPay
-      await Transaction.create({
+      savedTransaction = await Transaction.create({
         reference,
         provider: "notchpay",
         channel: tx.channel || "Orange Money",
@@ -88,17 +79,32 @@ export async function GET(req: NextRequest) {
         netAmount: tx.amount || 0,
         customerName: tx.customer?.name || "Unknown",
         customerPhone: tx.customer?.phone || undefined,
-        failureReason: isComplete
-          ? undefined
-          : tx.message || "Payment was not completed",
+        failureReason: isComplete ? undefined : tx.message || "Payment was not completed",
       });
-
-      console.log(`Transaction ${reference} created as fallback with status "${isComplete ? "complete" : "failed"}"`);
     }
+
+    console.log(`Transaction ${reference} updated to "${isComplete ? "complete" : "failed"}"`);
   } catch (dbError) {
     console.error("Failed to update transaction in database:", dbError);
   }
 
-  // 4. Return NotchPay data to frontend
+  // 3. Deliver webhook if transaction belongs to a merchant
+  if (savedTransaction?.userId) {
+    await deliverWebhook(savedTransaction.userId.toString(), {
+      event: isComplete ? "payment.complete" : "payment.failed",
+      reference,
+      status: isComplete ? "complete" : "failed",
+      amount: savedTransaction.merchantAmount,
+      currency: savedTransaction.currency,
+      channel: savedTransaction.channel,
+      provider: "notchpay",
+      customerName: savedTransaction.customerName,
+      customerPhone: savedTransaction.customerPhone,
+      nexapayFee: savedTransaction.nexapayFee,
+      netAmount: savedTransaction.netAmount,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   return NextResponse.json(notchpayData);
 }

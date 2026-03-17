@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/mongo_db";
 import User from "@/models/users";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession();
@@ -41,6 +42,11 @@ export async function POST(req: NextRequest) {
         { error: "Your application is already under review" },
         { status: 400 }
       );
+    }
+
+    // Generate API key for OAuth users who don't have one yet
+    if (!user.apiKey) {
+      user.apiKey = "npk_live_" + crypto.randomBytes(24).toString("hex");
     }
 
     user.business = {

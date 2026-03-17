@@ -18,8 +18,8 @@ const Navbar = () => {
     </Link>
     <ul className='flex gap-10 text-lg'>
        <li>
-        <Link href="/products" className='text-gray-300 hover:text-white transition-colors'>
-         Products 
+        <Link href="/about" className='text-gray-300 hover:text-white transition-colors'>
+         About
         </Link>
         </li> 
     </ul>
@@ -42,8 +42,8 @@ const Navbar = () => {
 
     <ul className='flex gap-10 text-lg'>
        <li>
-        <Link href="/resources" className='text-gray-300 hover:text-white transition-colors'>
-         Resources
+        <Link href="/contact" className='text-gray-300 hover:text-white transition-colors'>
+         Contact
         </Link>
         </li> 
     </ul>

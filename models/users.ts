@@ -19,6 +19,8 @@ export interface IUser extends Document {
     registeredAt: Date;
   };
   rejectionReason?: string;
+  webhookUrl?: string;
+  webhookSecret?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +52,11 @@ const UserSchema = new Schema<IUser>(
       registeredAt: { type: Date, default: Date.now },
     },
     rejectionReason: { type: String },
+    webhookUrl: { type: String },
+    webhookSecret: {
+      type: String,
+      default: () => "whsec_" + crypto.randomBytes(32).toString("hex"),
+    },
   },
   { timestamps: true }
 );

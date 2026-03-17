@@ -2,6 +2,7 @@ import { getPayPalAccessToken, PAYPAL_API_BASE } from "@/lib/aggregators/paypal/
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import Transaction from "@/models/transaction";
+import User from "@/models/users";
 import { getFeeBreakdown } from "@/lib/fees";
 
 export async function POST(req: NextRequest) {
@@ -13,13 +14,36 @@ export async function POST(req: NextRequest) {
       description = "Payment",
     } = body;
 
-    // 1. Calculate fees
-    // PayPal uses decimals (e.g. 10.00) so we convert to cents for fee calc then back
+    // 1. Validate API key and find merchant
+    let merchantId = null;
+    const apiKey = req.headers.get("x-api-key");
+
+    if (apiKey) {
+      try {
+        await connectToDatabase();
+        const merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
+        if (!merchant) {
+          return NextResponse.json(
+            { error: "Invalid or unauthorized API key" },
+            { status: 401 }
+          );
+        }
+        merchantId = merchant._id;
+      } catch (err) {
+        console.error("API key validation error:", err);
+        return NextResponse.json(
+          { error: "Could not validate API key" },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 2. Calculate fees
     const amountInCents = Math.round(parseFloat(amount) * 100);
     const fees = getFeeBreakdown(amountInCents, "paypal");
     const grossAmountDecimal = (fees.grossAmount / 100).toFixed(2);
 
-    // 2. Create PayPal order with gross amount
+    // 3. Create PayPal order with gross amount
     const accessToken = await getPayPalAccessToken();
 
     const orderResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
@@ -52,7 +76,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Save pending transaction to MongoDB
+    // 4. Save pending transaction to MongoDB
     try {
       await connectToDatabase();
 
@@ -62,21 +86,21 @@ export async function POST(req: NextRequest) {
         channel: "PayPal",
         status: "pending",
         currency,
+        ...(merchantId && { userId: merchantId }),
         merchantAmount: amountInCents,
         nexapayFee: fees.nexapayFee,
         grossAmount: fees.grossAmount,
         providerFee: fees.providerFee,
         netAmount: fees.netAmount,
-        customerName: "PayPal Customer",  // will be updated on capture
+        customerName: "PayPal Customer",
         customerPhone: undefined,
       });
 
-      console.log(`PayPal pending transaction saved: ${orderData.id} | Gross: ${grossAmountDecimal} ${currency}`);
+      console.log(`PayPal pending transaction saved: ${orderData.id} | Merchant: ${merchantId || "direct"} | Gross: ${grossAmountDecimal} ${currency}`);
     } catch (dbError) {
       console.error("Failed to save PayPal pending transaction:", dbError);
     }
 
-    console.log("PayPal order created:", orderData.id);
     return NextResponse.json({ id: orderData.id });
   } catch (error) {
     console.error("Error creating PayPal order:", error);

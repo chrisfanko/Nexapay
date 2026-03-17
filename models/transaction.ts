@@ -17,12 +17,15 @@ export interface ITransaction extends Document {
   status: TransactionStatus;
   currency: string;
 
+  // Merchant
+  userId?: mongoose.Types.ObjectId;
+
   // Amounts
-  merchantAmount: number;   
-  nexapayFee: number;       
-  grossAmount: number;      
-  providerFee: number;      
-  netAmount: number;        
+  merchantAmount: number;
+  nexapayFee: number;
+  grossAmount: number;
+  providerFee: number;
+  netAmount: number;
 
   // Customer
   customerName: string;
@@ -57,6 +60,13 @@ const TransactionSchema: Schema<ITransaction> = new mongoose.Schema(
       default: "pending",
     },
     currency: { type: String, required: true, default: "XAF" },
+
+    // Merchant
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
 
     // Amounts
     merchantAmount: { type: Number, required: true },

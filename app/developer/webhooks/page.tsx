@@ -1,197 +1,250 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { CheckCircle, XCircle, Copy, Save, RefreshCw } from "lucide-react";
+
+interface WebhookLog {
+  _id: string;
+  transactionReference: string;
+  webhookUrl: string;
+  event: string;
+  status: "success" | "failed";
+  statusCode?: number;
+  attempts: number;
+  createdAt: string;
+}
+
 export default function WebhooksPage() {
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [webhookSecret, setWebhookSecret] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [logs, setLogs] = useState<WebhookLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [showSecret, setShowSecret] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/webhooks/save")
+      .then((res) => res.json())
+      .then((data) => {
+        setWebhookUrl(data.webhookUrl || "");
+        setWebhookSecret(data.webhookSecret || "");
+      });
+
+    fetch("/api/webhooks/logs")
+      .then((res) => res.json())
+      .then((data) => {
+        setLogs(data.logs || []);
+        setLogsLoading(false);
+      })
+      .catch(() => setLogsLoading(false));
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    const res = await fetch("/api/webhooks/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ webhookUrl }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || "Failed to save");
+      setSaving(false);
+      return;
+    }
+
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const copySecret = () => {
+    navigator.clipboard.writeText(webhookSecret);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const refreshLogs = () => {
+    setLogsLoading(true);
+    fetch("/api/webhooks/logs")
+      .then((res) => res.json())
+      .then((data) => {
+        setLogs(data.logs || []);
+        setLogsLoading(false);
+      })
+      .catch(() => setLogsLoading(false));
+  };
+
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-10">
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
         <h1 className="text-3xl font-black text-zinc-900">Webhooks</h1>
         <p className="text-gray-500 mt-2">
-          Webhooks let NexaPay notify your server in real time when a payment
-          succeeds or fails — without your user needing to stay on the page.
+          Get notified in real-time when payments are completed or failed.
         </p>
       </div>
 
-      {/* What is a webhook */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-zinc-900 mb-3">
-          What is a Webhook?
-        </h2>
-        <p className="text-gray-500 text-sm leading-relaxed">
-          A webhook is an HTTP request that NexaPay sends to a URL you specify
-          whenever a payment event occurs. Instead of your app constantly asking
-          "did the payment go through?", NexaPay proactively tells your server
-          the moment something happens.
+      {/* Webhook URL */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-900 mb-1">Webhook Endpoint</h2>
+        <p className="text-sm text-gray-500 mb-5">
+          NexaPay will send a POST request to this URL after every payment event.
         </p>
-      </section>
 
-      {/* How to set up */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-zinc-900 mb-4">How to Set Up</h2>
-        <div className="space-y-4">
-          {[
-            {
-              step: "01",
-              title: "Create a webhook endpoint in your app",
-              description:
-                "Add a POST route in your app that will receive the webhook payload from NexaPay.",
-            },
-            {
-              step: "02",
-              title: "Set your callback URL",
-              description:
-                "In your initialize payment request, set the callback field to your endpoint URL e.g. https://yourdomain.com/api/webhooks/notchpay",
-            },
-            {
-              step: "03",
-              title: "Handle the payload",
-              description:
-                "Parse the incoming JSON payload, check the transaction status, and update your database accordingly.",
-            },
-            {
-              step: "04",
-              title: "Return a 200 response",
-              description:
-                "Always return a 200 status code to acknowledge receipt. If NexaPay doesn't get a 200, it will retry the webhook.",
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="flex gap-4 bg-white rounded-xl p-5 border border-gray-100 shadow-sm"
-            >
-              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0">
-                <span className="text-white text-xs font-bold">{item.step}</span>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-zinc-900 mb-1">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-500">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Webhook endpoint example */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-zinc-900 mb-3">
-          Example Webhook Endpoint
-        </h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Create this file in your Next.js app at{" "}
-          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-blue-600 text-xs">
-            app/api/webhooks/notchpay/route.ts
-          </code>
-        </p>
-        <div className="bg-zinc-900 rounded-xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-zinc-700">
-            <span className="text-xs text-zinc-400 font-medium">TypeScript</span>
+        <form onSubmit={handleSave} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+              Webhook URL
+            </label>
+            <input
+              type="url"
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              placeholder="https://yourapp.com/webhooks/nexapay"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-          <pre className="px-5 py-4 text-sm text-gray-300 overflow-x-auto font-mono leading-relaxed">
-{`import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  try {
-    const payload = await req.json();
-    const { transaction } = payload;
+          {error && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              <XCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
 
-    if (!transaction) {
-      return NextResponse.json(
-        { error: "Invalid payload" },
-        { status: 400 }
-      );
-    }
+          <button
+            type="submit"
+            disabled={saving || !webhookUrl}
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition"
+          >
+            {saving ? (
+              <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
+            ) : saved ? (
+              <><CheckCircle className="w-4 h-4" /> Saved!</>
+            ) : (
+              <><Save className="w-4 h-4" /> Save Endpoint</>
+            )}
+          </button>
+        </form>
+      </div>
 
-    if (transaction.status === "complete") {
-      // Payment succeeded — update your DB, send confirmation email, etc.
-      console.log("Payment complete:", transaction.reference);
-    } else {
-      // Payment failed or was cancelled
-      console.log("Payment failed:", transaction.reference);
-    }
-
-    // Always return 200 to acknowledge receipt
-    return NextResponse.json({ received: true }, { status: 200 });
-
-  } catch (error) {
-    console.error("Webhook error:", error);
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
-  }
-}`}
-          </pre>
-        </div>
-      </section>
-
-      {/* Payload structure */}
-      <section className="mb-10">
-        <h2 className="text-xl font-bold text-zinc-900 mb-3">
-          Webhook Payload Structure
-        </h2>
-        <p className="text-gray-500 text-sm mb-4">
-          This is what NexaPay sends to your endpoint when a payment event occurs:
+      {/* Webhook Secret */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-900 mb-1">Webhook Secret</h2>
+        <p className="text-sm text-gray-500 mb-5">
+          Use this secret to verify that webhook requests are coming from NexaPay.
+          Check the <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">X-NexaPay-Signature</code> header on incoming requests.
         </p>
 
-        <h3 className="text-sm font-semibold text-zinc-900 mb-2">
-          Payment Complete
-        </h3>
-        <div className="bg-zinc-900 rounded-xl px-5 py-4 font-mono text-sm text-gray-300 mb-4 overflow-x-auto">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm text-gray-700 overflow-hidden">
+            {showSecret ? webhookSecret : "whsec_" + "•".repeat(40)}
+          </div>
+          <button
+            onClick={() => setShowSecret(!showSecret)}
+            className="px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+          >
+            {showSecret ? "Hide" : "Reveal"}
+          </button>
+          <button
+            onClick={copySecret}
+            className="flex items-center gap-1.5 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+          >
+            <Copy className="w-4 h-4" />
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+      </div>
+
+      {/* Payload Example */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-900 mb-1">Payload Example</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          This is what NexaPay sends to your endpoint on a successful payment.
+        </p>
+        <pre className="bg-zinc-900 text-green-400 rounded-xl p-5 text-xs overflow-x-auto leading-relaxed">
 {`{
-  "transaction": {
-    "reference": "trx.xxx",
-    "status": "complete",
-    "amount": 5000,
-    "currency": "XAF",
-    "channel": "Orange Money",
-    "customer": {
-      "name": "John Doe",
-      "phone": "699123456"
-    }
-  }
+  "event": "payment.complete",
+  "reference": "tx_abc123...",
+  "status": "complete",
+  "amount": 10000,
+  "currency": "XAF",
+  "channel": "MTN Mobile Money",
+  "provider": "notchpay",
+  "customerName": "John Doe",
+  "customerPhone": "237600000000",
+  "nexapayFee": 150,
+  "netAmount": 9850,
+  "timestamp": "2026-03-16T10:00:00.000Z"
 }`}
+        </pre>
+      </div>
+
+      {/* Webhook Logs */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-zinc-900">Delivery Logs</h2>
+          <button
+            onClick={refreshLogs}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
         </div>
 
-        <h3 className="text-sm font-semibold text-zinc-900 mb-2">
-          Payment Failed
-        </h3>
-        <div className="bg-zinc-900 rounded-xl px-5 py-4 font-mono text-sm text-gray-300 overflow-x-auto">
-{`{
-  "transaction": {
-    "reference": "trx.xxx",
-    "status": "failed",
-    "amount": 5000,
-    "currency": "XAF",
-    "channel": "MTN Mobile Money",
-    "message": "Insufficient funds",
-    "customer": {
-      "name": "Jane Doe",
-      "phone": "677123456"
-    }
-  }
-}`}
-        </div>
-      </section>
-
-      {/* Important notes */}
-      <section>
-        <h2 className="text-xl font-bold text-zinc-900 mb-3">
-          Important Notes
-        </h2>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 space-y-2">
-          {[
-            "Always return a 200 status code to prevent NexaPay from retrying the webhook.",
-            "Validate the payload before processing to avoid handling malformed data.",
-            "Your webhook endpoint must be publicly accessible — localhost URLs will not work in production.",
-            "For testing, use a tool like ngrok to expose your local server to the internet.",
-          ].map((note, i) => (
-            <div key={i} className="flex gap-2 text-sm text-yellow-800">
-              <span className="shrink-0">⚠️</span>
-              <p>{note}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+        {logsLoading ? (
+          <div className="p-6 space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="p-12 text-center text-gray-400">
+            <p className="text-sm">No webhook deliveries yet.</p>
+            <p className="text-xs mt-1">Logs will appear here after your first payment.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {logs.map((log) => (
+              <div key={log._id} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition">
+                <div className="flex items-center gap-3">
+                  {log.status === "success"
+                    ? <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                    : <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                  }
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900">{log.event}</p>
+                    <p className="text-xs text-gray-400 font-mono">
+                      {log.transactionReference.slice(0, 24)}...
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-right">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    log.status === "success"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}>
+                    {log.statusCode || "—"}
+                  </span>
+                  <p className="text-xs text-gray-400">
+                    {new Date(log.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

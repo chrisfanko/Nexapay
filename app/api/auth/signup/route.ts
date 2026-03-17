@@ -36,11 +36,24 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (password.length < 5) {
+  if (password.length < 8) {
     return NextResponse.json(
-      { message: "Password must be atleast 5 characters" },
+      { message: "Password must be atleast 8 characters" },
       { status: 400 }
     );
+  }
+  if(!/\d/.test(password)){
+    return NextResponse.json(
+      {message: "Password must contain at least one number" },
+      {status: 400}
+    )
+
+  }
+  if(!/[!@#$%^&*(),.?":{}|<>]/.test(password)){
+    return NextResponse.json(
+      {message: "Password must contain at least one special character"},
+      {status: 400}
+    )
   }
 
   try {
@@ -56,7 +69,7 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Auto-generate a unique API key for this user
+    // Auto-generate a unique API key for  user
     const apiKey = generateApiKey();
 
     const newUser = new User({

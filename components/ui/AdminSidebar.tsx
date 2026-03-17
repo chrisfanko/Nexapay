@@ -9,65 +9,78 @@ import {
   ArrowLeftRight,
   Users,
   Building2,
+  Mail,
   ArrowLeft,
   Loader,
 } from "lucide-react";
-
-const sidebarLinks = [
-  {
-    label: "Overview",
-    href: "/admin",
-    icon: <LayoutDashboard className="w-4 h-4" />,
-  },
-  {
-    label: "Transactions",
-    href: "/admin/transactions",
-    icon: <ArrowLeftRight className="w-4 h-4" />,
-  },
-  {
-    label: "Merchants",
-    href: "/admin/merchants",
-    icon: <Users className="w-4 h-4" />,
-  },
-  {
-    label: "Businesses",
-    href: "/admin/businesses",
-    icon: <Building2 className="w-4 h-4" />,
-  },
-];
 
 export default function AdminSidebar() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const role = (session?.user as { role?: string })?.role;
+  const isAdmin = role === "admin";
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/sign-in");
-      return;
+    } else if (status === "authenticated" && !isAdmin) {
+      router.push("/");
     }
+  }, [status, isAdmin, router]);
 
-    if (status === "authenticated") {
-      // Verify admin role via API
-      fetch("/api/admin/stats")
-        .then((res) => {
-          if (res.status === 403 || res.status === 401) {
-            router.push("/");
-          } else {
-            setIsAdmin(true);
-          }
-          setChecking(false);
-        })
-        .catch(() => {
-          router.push("/");
-          setChecking(false);
-        });
-    }
-  }, [status, router]);
+  // Fetch unread message count every 60 seconds
+  useEffect(() => {
+    if (!isAdmin) return;
 
-  if (status === "loading" || checking) {
+    const fetchUnread = () => {
+      fetch("/api/admin/messages?filter=unread")
+        .then((res) => res.json())
+        .then((data) => setUnreadCount(data.unreadCount || 0))
+        .catch(() => {});
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => clearInterval(interval);
+  }, [isAdmin]);
+
+  const sidebarLinks = [
+    {
+      label: "Overview",
+      href: "/admin",
+      icon: <LayoutDashboard className="w-4 h-4" />,
+      badge: null,
+    },
+    {
+      label: "Transactions",
+      href: "/admin/transactions",
+      icon: <ArrowLeftRight className="w-4 h-4" />,
+      badge: null,
+    },
+    {
+      label: "Merchants",
+      href: "/admin/merchants",
+      icon: <Users className="w-4 h-4" />,
+      badge: null,
+    },
+    {
+      label: "Businesses",
+      href: "/admin/businesses",
+      icon: <Building2 className="w-4 h-4" />,
+      badge: null,
+    },
+    {
+      label: "Messages",
+      href: "/admin/messages",
+      icon: <Mail className="w-4 h-4" />,
+      badge: unreadCount > 0 ? unreadCount : null,
+    },
+  ];
+
+  if (status === "loading") {
     return (
       <aside className="w-64 bg-zinc-900 fixed h-full z-40 flex items-center justify-center">
         <Loader className="w-6 h-6 animate-spin text-white" />
@@ -107,7 +120,12 @@ export default function AdminSidebar() {
               }`}
             >
               {link.icon}
-              {link.label}
+              <span className="flex-1">{link.label}</span>
+              {link.badge !== null && (
+                <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                  {link.badge > 99 ? "99+" : link.badge}
+                </span>
+              )}
             </Link>
           );
         })}

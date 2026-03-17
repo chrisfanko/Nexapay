@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api/
+Disallow: /developer/
+Disallow: /dashboard/
+Disallow: /register-business
+
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /prices
+Allow: /solutions
+Allow: /sign-in
+Allow: /sign-up

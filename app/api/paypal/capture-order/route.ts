@@ -2,6 +2,7 @@ import { getPayPalAccessToken, PAYPAL_API_BASE } from "@/lib/aggregators/paypal/
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import Transaction from "@/models/transaction";
+import { deliverWebhook } from "@/lib/webhook";
 
 export async function POST(request: Request) {
   try {
@@ -9,10 +10,7 @@ export async function POST(request: Request) {
     const { orderID } = body;
 
     if (!orderID) {
-      return NextResponse.json(
-        { error: "Order ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
     }
 
     // 1. Capture the PayPal order
@@ -34,7 +32,6 @@ export async function POST(request: Request) {
     if (!response.ok) {
       console.error("PayPal capture error:", data);
 
-      // Update transaction as failed in DB
       try {
         await connectToDatabase();
         await Transaction.findOneAndUpdate(
@@ -60,21 +57,37 @@ export async function POST(request: Request) {
       ? `${payer.name?.given_name || ""} ${payer.name?.surname || ""}`.trim()
       : "PayPal Customer";
 
-    // 3. Update the pending transaction to complete in MongoDB
+    // 3. Update transaction to complete in MongoDB
+    let savedTransaction = null;
     try {
       await connectToDatabase();
 
-      await Transaction.findOneAndUpdate(
+      savedTransaction = await Transaction.findOneAndUpdate(
         { reference: orderID },
-        {
-          status: "complete",
-          customerName,
-        }
+        { status: "complete", customerName },
+        { new: true }
       );
 
       console.log(`PayPal transaction ${orderID} captured and updated to complete`);
     } catch (dbError) {
       console.error("Failed to update PayPal transaction in DB:", dbError);
+    }
+
+    // 4. Deliver webhook if transaction belongs to a merchant
+    if (savedTransaction?.userId) {
+      await deliverWebhook(savedTransaction.userId.toString(), {
+        event: "payment.complete",
+        reference: orderID,
+        status: "complete",
+        amount: savedTransaction.merchantAmount,
+        currency: savedTransaction.currency,
+        channel: "PayPal",
+        provider: "paypal",
+        customerName,
+        nexapayFee: savedTransaction.nexapayFee,
+        netAmount: savedTransaction.netAmount,
+        timestamp: new Date().toISOString(),
+      });
     }
 
     return NextResponse.json(data);
