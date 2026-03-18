@@ -1,77 +1,234 @@
+"use client";
+
 import { UserPlus, CreditCard, CheckCircle } from "lucide-react";
 
 const steps = [
   {
-    icon: <UserPlus className="w-8 h-8 text-white" />,
+    icon: <UserPlus className="w-8 h-8" />,
     step: "01",
     title: "Create your account",
-    description:
-      "Sign up for free in minutes. No paperwork, no hidden fees — just create your account and you're ready to go.",
+    description: "Sign up for free in minutes. No paperwork, no hidden fees — just create your account and you're ready to go.",
+    color: "#1E6FFF",
+    glow: "rgba(30,111,255,0.25)",
+    border: "rgba(30,111,255,0.3)",
+    bg: "rgba(30,111,255,0.08)",
   },
   {
-    icon: <CreditCard className="w-8 h-8 text-white" />,
+    icon: <CreditCard className="w-8 h-8" />,
     step: "02",
     title: "Choose a payment method",
-    description:
-      "Select from PayPal, Visa, Mastercard, Orange Money, MTN MoMo and more. We've got every payment method covered.",
+    description: "Select from PayPal, Orange Money, MTN MoMo and more. We've got every payment method covered.",
+    color: "#00D4AA",
+    glow: "rgba(0,212,170,0.25)",
+    border: "rgba(0,212,170,0.3)",
+    bg: "rgba(0,212,170,0.08)",
   },
   {
-    icon: <CheckCircle className="w-8 h-8 text-white" />,
+    icon: <CheckCircle className="w-8 h-8" />,
     step: "03",
     title: "Pay instantly",
-    description:
-      "Complete your payment in seconds. Fast, secure, and reliable — every single time.",
+    description: "Complete your payment in seconds. Fast, secure, and reliable — every single time.",
+    color: "#F59E0B",
+    glow: "rgba(245,158,11,0.25)",
+    border: "rgba(245,158,11,0.3)",
+    bg: "rgba(245,158,11,0.08)",
   },
 ];
 
 const HowItWorks = () => {
   return (
-    <section className="bg-white py-20 px-6">
-      <div className="max-w-5xl mx-auto">
+    <section style={{
+      background: "#0A1628",
+      padding: "100px 5%",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
+        .hiw-section { font-family: 'DM Sans', sans-serif; }
+
+        .hiw-card {
+          border-radius: 24px;
+          padding: 36px 28px;
+          border: 1px solid;
+          transition: all 0.35s cubic-bezier(.16,1,.3,1);
+          position: relative;
+          overflow: hidden;
+          text-align: center;
+          flex: 1;
+        }
+
+        .hiw-card:hover {
+          transform: translateY(-8px);
+        }
+
+        .hiw-step-num {
+          font-family: 'Syne', sans-serif;
+          font-size: 72px;
+          font-weight: 800;
+          line-height: 1;
+          opacity: 0.06;
+          position: absolute;
+          top: 16px;
+          right: 20px;
+          pointer-events: none;
+        }
+
+        .hiw-icon-wrap {
+          width: 72px;
+          height: 72px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 20px;
+          transition: transform 0.3s;
+          border: 1px solid;
+        }
+
+        .hiw-card:hover .hiw-icon-wrap {
+          transform: scale(1.08) rotate(-3deg);
+        }
+
+        .hiw-step-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          margin-bottom: 12px;
+          display: block;
+        }
+
+        .hiw-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 12px;
+        }
+
+        .hiw-desc {
+          font-size: 14px;
+          color: rgba(255,255,255,0.4);
+          line-height: 1.7;
+          font-weight: 300;
+        }
+
+        .hiw-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+          max-width: 1000px;
+          margin: 0 auto;
+          position: relative;
+        }
+
+        .hiw-connector {
+          position: absolute;
+          top: 56px;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(30,111,255,0.4), rgba(0,212,170,0.4));
+          z-index: 0;
+          left: calc(33.3% - 10px);
+          width: calc(33.3% + 20px);
+        }
+
+        .hiw-connector-2 {
+          left: calc(66.6% - 10px);
+          background: linear-gradient(90deg, rgba(0,212,170,0.4), rgba(245,158,11,0.4));
+        }
+
+        @media (max-width: 768px) {
+          .hiw-grid { grid-template-columns: 1fr; }
+          .hiw-connector, .hiw-connector-2 { display: none; }
+        }
+      `}</style>
+
+      {/* Background glows */}
+      <div style={{ position: "absolute", top: 0, left: "20%", width: 300, height: 300, background: "radial-gradient(circle, rgba(30,111,255,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 0, right: "20%", width: 300, height: 300, background: "radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      <div className="hiw-section">
         {/* Header */}
-        <div className="text-center mb-14">
-          <p className="text-blue-500 font-semibold text-sm uppercase tracking-widest mb-2">
+        <div style={{ textAlign: "center", marginBottom: 64 }}>
+          <span style={{
+            display: "inline-block",
+            background: "rgba(30,111,255,0.1)",
+            border: "1px solid rgba(30,111,255,0.25)",
+            color: "#1E6FFF",
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "6px 16px",
+            borderRadius: 100,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            marginBottom: 20,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
             How It Works
-          </p>
-          <h2 className="text-4xl font-black text-zinc-900">
-            3 simple steps to get started
+          </span>
+          <h2 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: "clamp(32px, 4vw, 48px)",
+            fontWeight: 800,
+            color: "#fff",
+            letterSpacing: "-0.02em",
+            marginBottom: 16,
+            lineHeight: 1.1,
+          }}>
+            3 simple steps to<br />
+            <span style={{ color: "#00D4AA" }}>get started</span>
           </h2>
-          <p className="text-gray-500 mt-4 max-w-xl mx-auto">
+          <p style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: 16,
+            maxWidth: 460,
+            margin: "0 auto",
+            lineHeight: 1.7,
+            fontWeight: 300,
+          }}>
             Getting started with NexaPay is quick and easy. No technical knowledge required.
           </p>
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((step, index) => (
-            <div key={step.step} className="relative flex flex-col items-center text-center">
-              
-              {/* Connector line */}
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-8 left-[60%] w-full h-0.5 bg-blue-100 z-0" />
-              )}
+        <div className="hiw-grid">
+          <div className="hiw-connector hidden md:block" />
+          <div className="hiw-connector hiw-connector-2 hidden md:block" />
 
-              {/* Icon circle */}
-              <div className="relative z-10 w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-200">
+          {steps.map((step) => (
+            <div
+              key={step.step}
+              className="hiw-card"
+              style={{
+                background: step.bg,
+                borderColor: step.border,
+                boxShadow: `0 8px 32px ${step.glow}`,
+              }}
+            >
+              <div className="hiw-step-num" style={{ color: step.color }}>{step.step}</div>
+
+              <div
+                className="hiw-icon-wrap"
+                style={{
+                  background: step.bg,
+                  borderColor: step.border,
+                  color: step.color,
+                  boxShadow: `0 0 20px ${step.glow}`,
+                }}
+              >
                 {step.icon}
               </div>
 
-              {/* Step number */}
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">
+              <span className="hiw-step-label" style={{ color: step.color }}>
                 Step {step.step}
               </span>
-
-              <h3 className="text-lg font-bold text-zinc-900 mb-2">
-                {step.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {step.description}
-              </p>
+              <div className="hiw-title">{step.title}</div>
+              <div className="hiw-desc">{step.description}</div>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

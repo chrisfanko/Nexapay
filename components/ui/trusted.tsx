@@ -10,18 +10,63 @@ const Trusted = () => {
   ];
 
   return (
-    <section className="bg-white py-12 px-6 border-y border-gray-100">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Title */}
-        <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-widest mb-10">
+    <section style={{
+      background: "#050A14",
+      padding: "60px 5%",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+
+        .trusted-section { font-family: 'DM Sans', sans-serif; }
+
+        .trusted-logo-wrap {
+          position: relative;
+          width: 120px;
+          height: 56px;
+          filter: brightness(0) invert(1);
+          opacity: 0.3;
+          transition: all 0.3s;
+        }
+
+        .trusted-logo-wrap:hover {
+          opacity: 1;
+          filter: brightness(1) invert(0);
+          transform: scale(1.1);
+        }
+
+        .trusted-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(30,111,255,0.3), rgba(0,212,170,0.3), transparent);
+          margin-bottom: 40px;
+        }
+      `}</style>
+
+      <div className="trusted-section" style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div className="trusted-divider" />
+
+        <p style={{
+          textAlign: "center",
+          fontSize: 11,
+          fontWeight: 600,
+          color: "rgba(255,255,255,0.25)",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+          marginBottom: 36,
+        }}>
           Trusted payment methods we support
         </p>
 
-        {/* Logos */}
-        <div className="flex flex-wrap items-center justify-center gap-10">
+        <div style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 40,
+        }}>
           {logos.map((logo) => (
-            <div key={logo.name} className="relative w-28 h-14 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+            <div key={logo.name} className="trusted-logo-wrap">
               <Image
                 src={logo.src}
                 alt={logo.name}
@@ -32,6 +77,7 @@ const Trusted = () => {
           ))}
         </div>
 
+        <div className="trusted-divider" style={{ marginTop: 40, marginBottom: 0 }} />
       </div>
     </section>
   );

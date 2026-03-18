@@ -1,70 +1,228 @@
+"use client";
+
 import { Shield, Zap, Globe, Smartphone } from "lucide-react";
 
 const features = [
   {
-    icon: <Shield className="w-6 h-6 text-blue-500" />,
+    icon: <Shield className="w-7 h-7" />,
     title: "Secure Payments",
-    description:
-      "Bank-level encryption and fraud detection keep every transaction safe and protected.",
+    description: "Bank-level encryption and fraud detection keep every transaction safe and protected.",
+    color: "#1E6FFF",
+    glow: "rgba(30,111,255,0.3)",
+    bg: "rgba(30,111,255,0.08)",
+    border: "rgba(30,111,255,0.25)",
+    tag: "Security",
   },
   {
-    icon: <Zap className="w-6 h-6 text-blue-500" />,
+    icon: <Zap className="w-7 h-7" />,
     title: "Fast Transactions",
-    description:
-      "Payments processed in seconds — no delays, no waiting, just instant results.",
+    description: "Payments processed in seconds — no delays, no waiting, just instant results.",
+    color: "#00D4AA",
+    glow: "rgba(0,212,170,0.3)",
+    bg: "rgba(0,212,170,0.08)",
+    border: "rgba(0,212,170,0.25)",
+    tag: "Speed",
   },
   {
-    icon: <Globe className="w-6 h-6 text-blue-500" />,
+    icon: <Globe className="w-7 h-7" />,
     title: "Multi-Currency Support",
-    description:
-      "Accept payments in multiple currencies from customers around the world.",
+    description: "Accept payments in multiple currencies from customers around the world.",
+    color: "#A78BFA",
+    glow: "rgba(167,139,250,0.3)",
+    bg: "rgba(167,139,250,0.08)",
+    border: "rgba(167,139,250,0.25)",
+    tag: "Global",
   },
   {
-    icon: <Smartphone className="w-6 h-6 text-blue-500" />,
+    icon: <Smartphone className="w-7 h-7" />,
     title: "Mobile Friendly",
-    description:
-      "Fully optimized for mobile — your customers can pay from any device, anywhere.",
+    description: "Fully optimized for mobile — your customers can pay from any device, anywhere.",
+    color: "#F59E0B",
+    glow: "rgba(245,158,11,0.3)",
+    bg: "rgba(245,158,11,0.08)",
+    border: "rgba(245,158,11,0.25)",
+    tag: "Mobile",
   },
 ];
 
 const Features = () => {
   return (
-    <section className="bg-gray-50 py-20 px-6">
-      <div className="max-w-5xl mx-auto">
+    <section style={{
+      background: "linear-gradient(180deg, #050A14 0%, #0A1628 100%)",
+      padding: "100px 5%",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
+        .features-section { font-family: 'DM Sans', sans-serif; }
+
+        .feature-card {
+          border-radius: 20px;
+          padding: 32px;
+          border: 1px solid;
+          transition: all 0.35s cubic-bezier(.16,1,.3,1);
+          position: relative;
+          overflow: hidden;
+          cursor: default;
+        }
+
+        .feature-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 2px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-6px);
+        }
+
+        .feature-card:hover::before {
+          opacity: 1;
+        }
+
+        .feature-icon-wrap {
+          width: 56px;
+          height: 56px;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          transition: all 0.3s;
+        }
+
+        .feature-card:hover .feature-icon-wrap {
+          transform: scale(1.1);
+        }
+
+        .feature-tag {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          margin-bottom: 10px;
+          display: block;
+        }
+
+        .feature-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 10px;
+        }
+
+        .feature-desc {
+          font-size: 14px;
+          color: rgba(255,255,255,0.45);
+          line-height: 1.7;
+          font-weight: 300;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+
+        @media (max-width: 640px) {
+          .features-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      {/* Background glow */}
+      <div style={{
+        position: "absolute",
+        top: "10%", left: "50%",
+        transform: "translateX(-50%)",
+        width: "600px", height: "300px",
+        background: "radial-gradient(ellipse, rgba(30,111,255,0.08) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      <div className="features-section">
         {/* Header */}
-        <div className="text-center mb-14">
-          <p className="text-blue-500 font-semibold text-sm uppercase tracking-widest mb-2">
+        <div style={{ textAlign: "center", marginBottom: 64 }}>
+          <span style={{
+            display: "inline-block",
+            background: "rgba(0,212,170,0.1)",
+            border: "1px solid rgba(0,212,170,0.25)",
+            color: "#00D4AA",
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "6px 16px",
+            borderRadius: 100,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            marginBottom: 20,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
             Why NexaPay
-          </p>
-          <h2 className="text-4xl font-black text-zinc-900">
-            Everything you need to accept payments
+          </span>
+          <h2 style={{
+            fontFamily: "'Syne', sans-serif",
+            fontSize: "clamp(32px, 4vw, 48px)",
+            fontWeight: 800,
+            color: "#fff",
+            letterSpacing: "-0.02em",
+            marginBottom: 16,
+            lineHeight: 1.1,
+          }}>
+            Everything you need to<br />
+            <span style={{ color: "#1E6FFF" }}>accept payments</span>
           </h2>
-          <p className="text-gray-500 mt-4 max-w-xl mx-auto">
+          <p style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: 16,
+            maxWidth: 480,
+            margin: "0 auto",
+            lineHeight: 1.7,
+            fontWeight: 300,
+          }}>
             Built for businesses of all sizes — from startups to enterprises across Africa and beyond.
           </p>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {features.map((feature) => (
+        {/* Cards */}
+        <div className="features-grid">
+          {features.map((f) => (
             <div
-              key={feature.title}
-              className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300"
+              key={f.title}
+              className="feature-card"
+              style={{
+                background: f.bg,
+                borderColor: f.border,
+                boxShadow: `0 4px 24px ${f.glow}`,
+              }}
             >
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-                {feature.icon}
+              <div
+                className="feature-card"
+                style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0,
+                  height: 2,
+                  background: f.color,
+                }}
+              />
+              <div
+                className="feature-icon-wrap"
+                style={{ background: f.bg, border: `1px solid ${f.border}`, color: f.color }}
+              >
+                {f.icon}
               </div>
-              <h3 className="text-lg font-bold text-zinc-900 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {feature.description}
-              </p>
+              <span className="feature-tag" style={{ color: f.color }}>{f.tag}</span>
+              <div className="feature-title">{f.title}</div>
+              <div className="feature-desc">{f.description}</div>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
