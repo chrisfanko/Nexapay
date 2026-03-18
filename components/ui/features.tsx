@@ -8,8 +8,8 @@ const features = [
     title: "Secure Payments",
     description: "Bank-level encryption and fraud detection keep every transaction safe and protected.",
     color: "#1E6FFF",
-    glow: "rgba(30,111,255,0.3)",
-    bg: "rgba(30,111,255,0.08)",
+    glow: "rgba(30,111,255,0.2)",
+    bg: "rgba(30,111,255,0.1)",
     border: "rgba(30,111,255,0.25)",
     tag: "Security",
   },
@@ -18,8 +18,8 @@ const features = [
     title: "Fast Transactions",
     description: "Payments processed in seconds — no delays, no waiting, just instant results.",
     color: "#00D4AA",
-    glow: "rgba(0,212,170,0.3)",
-    bg: "rgba(0,212,170,0.08)",
+    glow: "rgba(0,212,170,0.2)",
+    bg: "rgba(0,212,170,0.1)",
     border: "rgba(0,212,170,0.25)",
     tag: "Speed",
   },
@@ -28,8 +28,8 @@ const features = [
     title: "Multi-Currency Support",
     description: "Accept payments in multiple currencies from customers around the world.",
     color: "#A78BFA",
-    glow: "rgba(167,139,250,0.3)",
-    bg: "rgba(167,139,250,0.08)",
+    glow: "rgba(167,139,250,0.2)",
+    bg: "rgba(167,139,250,0.1)",
     border: "rgba(167,139,250,0.25)",
     tag: "Global",
   },
@@ -38,8 +38,8 @@ const features = [
     title: "Mobile Friendly",
     description: "Fully optimized for mobile — your customers can pay from any device, anywhere.",
     color: "#F59E0B",
-    glow: "rgba(245,158,11,0.3)",
-    bg: "rgba(245,158,11,0.08)",
+    glow: "rgba(245,158,11,0.2)",
+    bg: "rgba(245,158,11,0.1)",
     border: "rgba(245,158,11,0.25)",
     tag: "Mobile",
   },
@@ -68,42 +68,30 @@ const Features = () => {
           cursor: default;
         }
 
-        .feature-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 2px;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-
         .feature-card:hover {
           transform: translateY(-6px);
         }
 
-        .feature-card:hover::before {
-          opacity: 1;
-        }
-
-        .feature-icon-wrap {
-          width: 56px;
-          height: 56px;
+        .feature-icon-circle {
+          width: 60px;
+          height: 60px;
           border-radius: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-bottom: 20px;
-          transition: all 0.3s;
+          transition: transform 0.3s;
+          flex-shrink: 0;
         }
 
-        .feature-card:hover .feature-icon-wrap {
+        .feature-card:hover .feature-icon-circle {
           transform: scale(1.1);
         }
 
         .feature-tag {
           font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.1em;
+          font-weight: 700;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           margin-bottom: 10px;
           display: block;
@@ -143,7 +131,7 @@ const Features = () => {
         top: "10%", left: "50%",
         transform: "translateX(-50%)",
         width: "600px", height: "300px",
-        background: "radial-gradient(ellipse, rgba(30,111,255,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(ellipse, rgba(30,111,255,0.07) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -197,26 +185,24 @@ const Features = () => {
               key={f.title}
               className="feature-card"
               style={{
-                background: f.bg,
+                background: "rgba(255,255,255,0.03)",
                 borderColor: f.border,
                 boxShadow: `0 4px 24px ${f.glow}`,
+                borderTop: `3px solid ${f.color}`,
               }}
             >
+              {/* Icon circle — fully visible, colored background */}
               <div
-                className="feature-card"
+                className="feature-icon-circle"
                 style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0,
-                  height: 2,
-                  background: f.color,
+                  background: f.bg,
+                  border: `1px solid ${f.border}`,
+                  color: f.color,
                 }}
-              />
-              <div
-                className="feature-icon-wrap"
-                style={{ background: f.bg, border: `1px solid ${f.border}`, color: f.color }}
               >
                 {f.icon}
               </div>
+
               <span className="feature-tag" style={{ color: f.color }}>{f.tag}</span>
               <div className="feature-title">{f.title}</div>
               <div className="feature-desc">{f.description}</div>

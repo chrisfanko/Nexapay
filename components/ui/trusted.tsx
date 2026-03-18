@@ -25,14 +25,11 @@ const Trusted = () => {
           position: relative;
           width: 120px;
           height: 56px;
-          filter: brightness(0) invert(1);
-          opacity: 0.3;
-          transition: all 0.3s;
+          transition: transform 0.3s;
+          opacity: 1;
         }
 
         .trusted-logo-wrap:hover {
-          opacity: 1;
-          filter: brightness(1) invert(0);
           transform: scale(1.1);
         }
 
@@ -50,7 +47,7 @@ const Trusted = () => {
           textAlign: "center",
           fontSize: 11,
           fontWeight: 600,
-          color: "rgba(255,255,255,0.25)",
+          color: "rgba(255,255,255,0.35)",
           letterSpacing: "0.15em",
           textTransform: "uppercase",
           marginBottom: 36,
