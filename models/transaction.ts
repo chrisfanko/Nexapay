@@ -8,6 +8,7 @@ export type PaymentChannel =
   | "Visa"
   | "Mastercard";
 export type PaymentProvider = "notchpay" | "paypal" | "stripe";
+export type TransactionMode = "live" | "test";
 
 export interface ITransaction extends Document {
   // Identity
@@ -16,6 +17,7 @@ export interface ITransaction extends Document {
   channel: PaymentChannel;
   status: TransactionStatus;
   currency: string;
+  mode: TransactionMode;
 
   // Merchant
   userId?: mongoose.Types.ObjectId;
@@ -60,6 +62,14 @@ const TransactionSchema: Schema<ITransaction> = new mongoose.Schema(
       default: "pending",
     },
     currency: { type: String, required: true, default: "XAF" },
+
+    // Mode — live or test
+    mode: {
+      type: String,
+      enum: ["live", "test"],
+      required: true,
+      default: "live",
+    },
 
     // Merchant
     userId: {

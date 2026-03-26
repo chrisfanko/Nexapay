@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/mongo_db";
 import Transaction from "@/models/transaction";
 import User from "@/models/users";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession();
 
   if (!session?.user?.email) {
@@ -14,14 +14,16 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    // Find the current merchant
     const merchant = await User.findOne({ email: session.user.email });
     if (!merchant) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Filter transactions by this merchant's userId
-    const filter = { userId: merchant._id };
+    const { searchParams } = req.nextUrl;
+    const mode = searchParams.get("mode") || "live"; // "live" or "test"
+
+    // Filter by merchant + mode
+    const filter = { userId: merchant._id, mode };
 
     const totalTransactions = await Transaction.countDocuments(filter);
     const successfulTransactions = await Transaction.countDocuments({ ...filter, status: "complete" });
@@ -39,7 +41,6 @@ export async function GET() {
         ? Math.round((successfulTransactions / totalTransactions) * 100)
         : 0;
 
-    // Recent 5 transactions for this merchant
     const recentTransactions = await Transaction.find(filter)
       .sort({ createdAt: -1 })
       .limit(5);
@@ -52,6 +53,7 @@ export async function GET() {
       totalVolume,
       successRate,
       recentTransactions,
+      mode,
     });
   } catch (error) {
     console.error("Dashboard stats error:", error);

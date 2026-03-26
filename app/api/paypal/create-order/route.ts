@@ -16,18 +16,38 @@ export async function POST(req: NextRequest) {
 
     // 1. Validate API key and find merchant
     let merchantId = null;
+    let mode: "live" | "test" = "live";
     const apiKey = req.headers.get("x-api-key");
 
     if (apiKey) {
       try {
         await connectToDatabase();
-        const merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
-        if (!merchant) {
-          return NextResponse.json(
-            { error: "Invalid or unauthorized API key" },
-            { status: 401 }
-          );
+
+        const isTestKey = apiKey.startsWith("npk_test_");
+
+        let merchant;
+        if (isTestKey) {
+          // Test key — no approval needed
+          merchant = await User.findOne({ testApiKey: apiKey });
+          if (!merchant) {
+            return NextResponse.json(
+              { error: "Invalid test API key" },
+              { status: 401 }
+            );
+          }
+          mode = "test";
+        } else {
+          // Live key — must be approved
+          merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
+          if (!merchant) {
+            return NextResponse.json(
+              { error: "Invalid or unauthorized API key. Make sure your business is approved." },
+              { status: 401 }
+            );
+          }
+          mode = "live";
         }
+
         merchantId = merchant._id;
       } catch (err) {
         console.error("API key validation error:", err);
@@ -43,7 +63,7 @@ export async function POST(req: NextRequest) {
     const fees = getFeeBreakdown(amountInCents, "paypal");
     const grossAmountDecimal = (fees.grossAmount / 100).toFixed(2);
 
-    // 3. Create PayPal order with gross amount
+    // 3. Create PayPal order
     const accessToken = await getPayPalAccessToken();
 
     const orderResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
@@ -56,7 +76,7 @@ export async function POST(req: NextRequest) {
         intent: "CAPTURE",
         purchase_units: [
           {
-            description,
+            description: `[${mode.toUpperCase()}] ${description}`,
             amount: {
               currency_code: currency,
               value: grossAmountDecimal,
@@ -86,6 +106,7 @@ export async function POST(req: NextRequest) {
         channel: "PayPal",
         status: "pending",
         currency,
+        mode,
         ...(merchantId && { userId: merchantId }),
         merchantAmount: amountInCents,
         nexapayFee: fees.nexapayFee,
@@ -96,12 +117,12 @@ export async function POST(req: NextRequest) {
         customerPhone: undefined,
       });
 
-      console.log(`PayPal pending transaction saved: ${orderData.id} | Merchant: ${merchantId || "direct"} | Gross: ${grossAmountDecimal} ${currency}`);
+      console.log(`[${mode.toUpperCase()}] PayPal transaction saved: ${orderData.id} | Merchant: ${merchantId || "direct"}`);
     } catch (dbError) {
       console.error("Failed to save PayPal pending transaction:", dbError);
     }
 
-    return NextResponse.json({ id: orderData.id });
+    return NextResponse.json({ id: orderData.id, mode });
   } catch (error) {
     console.error("Error creating PayPal order:", error);
     return NextResponse.json(

@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
-    // Find the current merchant
     const merchant = await User.findOne({ email: session.user.email });
     if (!merchant) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -24,11 +23,15 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status");
     const channel = searchParams.get("channel");
     const search = searchParams.get("search");
+    const mode = searchParams.get("mode") || "live"; // "live" or "test"
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
-    // Always filter by this merchant's userId
-    const query: Record<string, unknown> = { userId: merchant._id };
+    // Filter by merchant + mode
+    const query: Record<string, unknown> = {
+      userId: merchant._id,
+      mode,
+    };
 
     if (status && status !== "all") query.status = status;
     if (channel && channel !== "all") query.channel = channel;

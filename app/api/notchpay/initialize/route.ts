@@ -17,18 +17,39 @@ export async function POST(req: NextRequest) {
 
   // 2. Validate API key and find merchant
   let merchantId = null;
+  let mode: "live" | "test" = "live";
   const apiKey = req.headers.get("x-api-key");
 
   if (apiKey) {
     try {
       await connectToDatabase();
-      const merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
-      if (!merchant) {
-        return NextResponse.json(
-          { error: "Invalid or unauthorized API key" },
-          { status: 401 }
-        );
+
+      // Check if it's a test key (npk_test_...) or live key (npk_live_...)
+      const isTestKey = apiKey.startsWith("npk_test_");
+
+      let merchant;
+      if (isTestKey) {
+        // Test key — any registered user can use it, no approval needed
+        merchant = await User.findOne({ testApiKey: apiKey });
+        if (!merchant) {
+          return NextResponse.json(
+            { error: "Invalid test API key" },
+            { status: 401 }
+          );
+        }
+        mode = "test";
+      } else {
+        // Live key — merchant must be approved
+        merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
+        if (!merchant) {
+          return NextResponse.json(
+            { error: "Invalid or unauthorized API key. Make sure your business is approved." },
+            { status: 401 }
+          );
+        }
+        mode = "live";
       }
+
       merchantId = merchant._id;
     } catch (err) {
       console.error("API key validation error:", err);
@@ -42,7 +63,7 @@ export async function POST(req: NextRequest) {
   // 3. Calculate fees
   const fees = getFeeBreakdown(Number(amount), "notchpay");
 
-  // 4. Send to NotchPay with the gross amount
+  // 4. Send to NotchPay
   let notchpayData;
   try {
     const response = await fetch("https://api.notchpay.co/payments", {
@@ -55,13 +76,9 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         amount: fees.grossAmount,
         currency: currency || "XAF",
-        description: "Payment via " + channel,
+        description: `[${mode.toUpperCase()}] Payment via ${channel}`,
         callback: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
-        customer: {
-          email,
-          name,
-          phone,
-        },
+        customer: { email, name, phone },
       }),
     });
 
@@ -94,6 +111,7 @@ export async function POST(req: NextRequest) {
         channel,
         status: "pending",
         currency: currency || "XAF",
+        mode,
         ...(merchantId && { userId: merchantId }),
         merchantAmount: fees.merchantAmount,
         nexapayFee: fees.nexapayFee,
@@ -104,12 +122,11 @@ export async function POST(req: NextRequest) {
         customerPhone: phone,
       });
 
-      console.log(`Pending transaction saved: ${reference} | Merchant: ${merchantId || "direct"} | Gross: ${fees.grossAmount} | NexaPay fee: ${fees.nexapayFee}`);
+      console.log(`[${mode.toUpperCase()}] Transaction saved: ${reference} | Merchant: ${merchantId || "direct"}`);
     }
   } catch (dbError) {
     console.error("Failed to save pending transaction:", dbError);
   }
 
-  // 6. Return NotchPay response to frontend
-  return NextResponse.json(notchpayData);
+  return NextResponse.json({ ...notchpayData, mode });
 }

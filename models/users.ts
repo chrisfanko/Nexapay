@@ -8,6 +8,7 @@ export interface IUser extends Document {
   image?: string;
   role: "user" | "admin";
   apiKey: string;
+  testApiKey: string;
   merchantStatus: "unverified" | "pending" | "approved" | "rejected";
   business?: {
     companyName: string;
@@ -36,6 +37,11 @@ const UserSchema = new Schema<IUser>(
       type: String,
       unique: true,
       default: () => "npk_live_" + crypto.randomBytes(24).toString("hex"),
+    },
+    testApiKey: {
+      type: String,
+      unique: true,
+      default: () => "npk_test_" + crypto.randomBytes(24).toString("hex"),
     },
     merchantStatus: {
       type: String,
