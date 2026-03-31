@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import Link from "next/link";
 import {
   Key,
@@ -40,6 +40,11 @@ const sidebarLinks = [
     href: "/developer/webhooks",
     icon: <Webhook className="w-4 h-4" />,
   },
+  {
+    label: "Dashboard",
+    href: "dashboard",
+    icon: <LayoutDashboard className="w-4 h-4" />,
+  }
 ];
 
 export default function DeveloperSidebar() {
