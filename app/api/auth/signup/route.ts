@@ -55,7 +55,12 @@ export async function POST(request: Request) {
       {status: 400}
     )
   }
-
+  if(!/[A-Z]/.test(password)){
+    return NextResponse.json(
+      {message: "Password must contain at least one uppercase letter"},
+      {status: 400}
+    )
+  }
   try {
     await connectToDatabase();
 

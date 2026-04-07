@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
-import { lazy, useEffect } from "react";
+import {  useEffect } from "react";
 import Link from "next/link";
 import {
   Key,

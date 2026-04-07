@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import Link from 'next/link'
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from 'react-icons/fc';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { TriangleAlert, Eye, EyeOff } from 'lucide-react';
@@ -31,13 +31,22 @@ const SignIn = () => {
     })
 
     if (res?.ok) {
-      router.push("/");
+      const session = await getSession();
+      const role = session?.user?.role;
+
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
+
       toast.success("Login successful")
     } else if (res?.status === 401) {
       setError("Invalid Credentials")
       setPending(false);
     } else {
       setError("Something went wrong")
+      setPending(false);
     };
   }
 
@@ -75,7 +84,6 @@ const SignIn = () => {
               required
             />
 
-            {/* Password field with toggle */}
             <div className='relative'>
               <Input
                 type={showPassword ? 'text' : 'password'}
