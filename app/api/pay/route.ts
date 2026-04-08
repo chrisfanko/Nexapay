@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import User from "@/models/users";
+import PaymentSession from "@/models/paymentSession";
+import crypto from "crypto";
 
 // ── CORS headers ───────────────────────────────────────────
 const corsHeaders = {
@@ -9,20 +11,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, x-api-key",
 };
 
-// ── Handle preflight requests ──────────────────────────────
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-// ── Supported methods ──────────────────────────────────────
-const NOTCHPAY_METHODS = ["mtn_money", "orange_money", "mobile_money"];
-const PAYPAL_METHODS = ["paypal"];
-const CARD_METHODS = ["visa", "mastercard"];
-
-// ── Validate API key helper ────────────────────────────────
+// ── Validate API key ───────────────────────────────────────
 async function validateApiKey(apiKey: string) {
   await connectToDatabase();
-
   const isTestKey = apiKey.startsWith("npk_test_");
 
   let merchant;
@@ -34,13 +29,13 @@ async function validateApiKey(apiKey: string) {
     merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
     if (!merchant) return {
       error: "Invalid or unauthorized API key. Make sure your business is approved.",
-      status: 401
+      status: 401,
     };
     return { merchant, mode: "live" as const };
   }
 }
 
-// ── Main unified endpoint ──────────────────────────────────
+// ── Main endpoint ──────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     // 1. Check API key
@@ -64,97 +59,61 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse body
     const body = await req.json();
-    const { amount, currency = "XAF", method, email, name, phone, description } = body;
+    const {
+      amount,
+      currency = "XAF",
+      description,
+      customerName,
+      customerEmail,
+      customerPhone,
+      successUrl,
+      cancelUrl,
+    } = body;
 
     // 3. Validate required fields
-    if (!amount || !method) {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       return NextResponse.json(
-        { error: "Missing required fields: amount, method" },
+        { error: "Invalid or missing amount" },
         { status: 400, headers: corsHeaders }
       );
     }
 
-    const normalizedMethod = method.toLowerCase();
+    // 4. Create payment session
+    await connectToDatabase();
+    const sessionId = crypto.randomBytes(16).toString("hex");
 
-    // 4. Route to the right provider
+    await PaymentSession.create({
+      sessionId,
+      merchantId: merchant._id,
+      merchantName: merchant.name,
+      mode,
+      amount: Number(amount),
+      currency,
+      description,
+      customerName,
+      customerEmail,
+      customerPhone,
+      successUrl,
+      cancelUrl,
+    });
+
+    // 5. Return checkout URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-    const headers = {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-    };
+    const checkoutUrl = `${baseUrl}/checkout/${sessionId}`;
 
-    // ── NotchPay (MTN, Orange, Mobile Money) ──
-    if (NOTCHPAY_METHODS.includes(normalizedMethod)) {
-      if (!name || !phone) {
-        return NextResponse.json(
-          { error: "Missing required fields for mobile money: name, phone" },
-          { status: 400, headers: corsHeaders }
-        );
-      }
-
-      const res = await fetch(`${baseUrl}/api/notchpay/initialize`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ amount, currency, email, name, phone, channel: normalizedMethod }),
-      });
-
-      const data = await res.json();
-      return NextResponse.json({
-        provider: "notchpay",
-        method: normalizedMethod,
-        mode,
-        merchant: merchant.name,
-        ...data,
-      }, { status: res.status, headers: corsHeaders });
-    }
-
-    // ── PayPal ──
-    if (PAYPAL_METHODS.includes(normalizedMethod)) {
-      const res = await fetch(`${baseUrl}/api/paypal/create-order`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ amount, currency: currency || "USD", description }),
-      });
-
-      const data = await res.json();
-      return NextResponse.json({
-        provider: "paypal",
-        method: normalizedMethod,
-        mode,
-        merchant: merchant.name,
-        ...data,
-      }, { status: res.status, headers: corsHeaders });
-    }
-
-    // ── Card (Visa/Mastercard) ──
-    if (CARD_METHODS.includes(normalizedMethod)) {
-      const res = await fetch(`${baseUrl}/api/notchpay/initialize`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ amount, currency, email, name, phone, channel: normalizedMethod }),
-      });
-
-      const data = await res.json();
-      return NextResponse.json({
-        provider: "notchpay",
-        method: normalizedMethod,
-        mode,
-        merchant: merchant.name,
-        ...data,
-      }, { status: res.status, headers: corsHeaders });
-    }
-
-    // ── Unknown method ──
     return NextResponse.json(
       {
-        error: `Unsupported payment method: ${method}`,
-        supported_methods: [...NOTCHPAY_METHODS, ...PAYPAL_METHODS, ...CARD_METHODS]
+        success: true,
+        checkout_url: checkoutUrl,
+        session_id: sessionId,
+        mode,
+        expires_at: new Date(Date.now() + 60 * 60 * 1000),
       },
-      { status: 400, headers: corsHeaders }
+      { headers: corsHeaders }
     );
 
   } catch (error) {
-    console.error("Unified pay endpoint error:", error);
+    console.error("Pay endpoint error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500, headers: corsHeaders }

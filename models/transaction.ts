@@ -69,7 +69,7 @@ const TransactionSchema: Schema<ITransaction> = new mongoose.Schema(
       enum: ["live", "test"],
       required: true,
       default: "live",
-    },
+    }, 
 
     // Merchant
     userId: {
