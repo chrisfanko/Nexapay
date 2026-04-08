@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import User from "@/models/users";
 
+// ── CORS headers ───────────────────────────────────────────
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, x-api-key",
+};
+
+// ── Handle preflight requests ──────────────────────────────
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 // ── Supported methods ──────────────────────────────────────
 const NOTCHPAY_METHODS = ["mtn_money", "orange_money", "mobile_money"];
 const PAYPAL_METHODS = ["paypal"];
@@ -20,9 +32,9 @@ async function validateApiKey(apiKey: string) {
     return { merchant, mode: "test" as const };
   } else {
     merchant = await User.findOne({ apiKey, merchantStatus: "approved" });
-    if (!merchant) return { 
-      error: "Invalid or unauthorized API key. Make sure your business is approved.", 
-      status: 401 
+    if (!merchant) return {
+      error: "Invalid or unauthorized API key. Make sure your business is approved.",
+      status: 401
     };
     return { merchant, mode: "live" as const };
   }
@@ -36,7 +48,7 @@ export async function POST(req: NextRequest) {
     if (!apiKey) {
       return NextResponse.json(
         { error: "Missing x-api-key header" },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -44,7 +56,7 @@ export async function POST(req: NextRequest) {
     if ("error" in authResult) {
       return NextResponse.json(
         { error: authResult.error },
-        { status: authResult.status }
+        { status: authResult.status, headers: corsHeaders }
       );
     }
 
@@ -58,7 +70,7 @@ export async function POST(req: NextRequest) {
     if (!amount || !method) {
       return NextResponse.json(
         { error: "Missing required fields: amount, method" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -76,7 +88,7 @@ export async function POST(req: NextRequest) {
       if (!name || !phone) {
         return NextResponse.json(
           { error: "Missing required fields for mobile money: name, phone" },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         );
       }
 
@@ -93,7 +105,7 @@ export async function POST(req: NextRequest) {
         mode,
         merchant: merchant.name,
         ...data,
-      }, { status: res.status });
+      }, { status: res.status, headers: corsHeaders });
     }
 
     // ── PayPal ──
@@ -111,12 +123,11 @@ export async function POST(req: NextRequest) {
         mode,
         merchant: merchant.name,
         ...data,
-      }, { status: res.status });
+      }, { status: res.status, headers: corsHeaders });
     }
 
     // ── Card (Visa/Mastercard) ──
     if (CARD_METHODS.includes(normalizedMethod)) {
-      // Route to notchpay as it handles cards too
       const res = await fetch(`${baseUrl}/api/notchpay/initialize`, {
         method: "POST",
         headers,
@@ -130,23 +141,23 @@ export async function POST(req: NextRequest) {
         mode,
         merchant: merchant.name,
         ...data,
-      }, { status: res.status });
+      }, { status: res.status, headers: corsHeaders });
     }
 
     // ── Unknown method ──
     return NextResponse.json(
-      { 
+      {
         error: `Unsupported payment method: ${method}`,
         supported_methods: [...NOTCHPAY_METHODS, ...PAYPAL_METHODS, ...CARD_METHODS]
       },
-      { status: 400 }
+      { status: 400, headers: corsHeaders }
     );
 
   } catch (error) {
     console.error("Unified pay endpoint error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
