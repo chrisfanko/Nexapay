@@ -22,7 +22,7 @@ type Session = {
 const PAYMENT_METHODS = [
   { id: "mtn_money", label: "MTN Mobile Money", icon: "📱", currency: ["XAF", "XOF"] },
   { id: "orange_money", label: "Orange Money", icon: "🟠", currency: ["XAF", "XOF"] },
-  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD"] },
+  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD","XAF"] },
   { id: "visa", label: "Visa Card", icon: "💳", currency: ["USD", "EUR", "XAF"] },
   { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"] },
 ];
