@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         amount: fees.grossAmount,
         currency: currency || "XAF",
         description: `[${mode.toUpperCase()}] Payment via ${channel}`,
-        callback: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success`,
+        callback: `${process.env.NEXT_PUBLIC_BASE_URL}/api/notchpay/verify`,
         customer: { email, name, phone },
       }),
     });

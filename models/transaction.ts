@@ -87,7 +87,7 @@ const TransactionSchema: Schema<ITransaction> = new mongoose.Schema(
 
     // Customer
     customerName: { type: String, required: true },
-    customerPhone: { type: String, required: false },
+    customerPhone: { type: String, required:false},
 
     // Failure
     failureReason: { type: String, required: false },

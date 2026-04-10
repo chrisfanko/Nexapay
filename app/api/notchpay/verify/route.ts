@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import Transaction from "@/models/transaction";
+import PaymentSession from "@/models/paymentSession";
 import { deliverWebhook } from "@/lib/webhook";
 
 export async function GET(req: NextRequest) {
@@ -66,12 +67,19 @@ export async function GET(req: NextRequest) {
         { new: true }
       );
     } else {
+      // Try to find userId from PaymentSession
+      const paymentSession = await PaymentSession.findOne({ 
+        transactionReference: reference 
+      });
+
       savedTransaction = await Transaction.create({
         reference,
         provider: "notchpay",
         channel: tx.channel || "Orange Money",
         status: isComplete ? "complete" : "failed",
         currency: tx.currency || "XAF",
+        mode: paymentSession?.mode || "live",
+        ...(paymentSession?.merchantId && { userId: paymentSession.merchantId }),
         merchantAmount: tx.amount || 0,
         nexapayFee: 0,
         grossAmount: tx.amount || 0,
@@ -83,12 +91,20 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // 3. Mark session as completed
+    if (isComplete) {
+      await PaymentSession.findOneAndUpdate(
+        { transactionReference: reference },
+        { status: "completed" }
+      );
+    }
+
     console.log(`Transaction ${reference} updated to "${isComplete ? "complete" : "failed"}"`);
   } catch (dbError) {
     console.error("Failed to update transaction in database:", dbError);
   }
 
-  // 3. Deliver webhook if transaction belongs to a merchant
+  // 4. Deliver webhook if transaction belongs to a merchant
   if (savedTransaction?.userId) {
     await deliverWebhook(savedTransaction.userId.toString(), {
       event: isComplete ? "payment.complete" : "payment.failed",
@@ -106,5 +122,26 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json(notchpayData);
+  // 5. Redirect to merchant's successUrl or cancelUrl instead of Nexapay page
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+  const paymentSession = await PaymentSession.findOne({ 
+    transactionReference: reference 
+  }).catch(() => null);
+
+  if (paymentSession) {
+    if (isComplete && paymentSession.successUrl) {
+      return NextResponse.redirect(
+        `${paymentSession.successUrl}?reference=${reference}&status=complete`
+      );
+    } else if (!isComplete && paymentSession.cancelUrl) {
+      return NextResponse.redirect(
+        `${paymentSession.cancelUrl}?reference=${reference}&status=failed`
+      );
+    }
+  }
+
+  // Fallback — redirect to Nexapay success page if no merchant URL
+  return NextResponse.redirect(
+    `${baseUrl}/payment/success?reference=${reference}`
+  );
 }
