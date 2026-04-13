@@ -3,6 +3,7 @@ import connectToDatabase from "@/lib/mongo_db";
 import User from "@/models/users";
 import PaymentSession from "@/models/paymentSession";
 import crypto from "crypto";
+import { getFeeBreakdown } from "@/lib/fees";
 
 // ── CORS headers ───────────────────────────────────────────
 const corsHeaders = {
@@ -82,35 +83,51 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const sessionId = crypto.randomBytes(16).toString("hex");
 
-    await PaymentSession.create({
-      sessionId,
-      merchantId: merchant._id,
-      merchantName: merchant.name,
-      mode,
-      amount: Number(amount),
-      currency,
-      description,
-      customerName,
-      customerEmail,
-      customerPhone,
-      successUrl,
-      cancelUrl,
-    });
+    // Calculate fees at session creation
+  const provider = ["USD", "EUR", "GBP", "CAD"].includes(currency) 
+    ? "paypal" 
+    : "notchpay";
+  const fees = getFeeBreakdown(Number(amount), provider);
+
+  await PaymentSession.create({
+    sessionId,
+    merchantId: merchant._id,
+    merchantName: merchant.name,
+    mode,
+    amount: Number(amount),        // original merchant amount
+    currency,
+    description,
+    customerName,
+    customerEmail,
+    customerPhone,
+    successUrl,
+    cancelUrl,
+    // Store full fee breakdown
+    merchantAmount: fees.merchantAmount,
+    nexapayFee: fees.nexapayFee,
+    grossAmount: fees.grossAmount,
+    providerFee: fees.providerFee,
+    netAmount: fees.netAmount,
+  });
 
     // 5. Return checkout URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
     const checkoutUrl = `${baseUrl}/checkout/${sessionId}`;
 
-    return NextResponse.json(
-      {
-        success: true,
-        checkout_url: checkoutUrl,
-        session_id: sessionId,
-        mode,
-        expires_at: new Date(Date.now() + 60 * 60 * 1000),
-      },
-      { headers: corsHeaders }
-    );
+      return NextResponse.json(
+    {
+      success: true,
+      checkout_url: checkoutUrl,
+      session_id: sessionId,
+      mode,
+      amount: Number(amount),
+      grossAmount: fees.grossAmount,
+      nexapayFee: fees.nexapayFee,
+      currency,
+      expires_at: new Date(Date.now() + 60 * 60 * 1000),
+    },
+    { headers: corsHeaders }
+  );
 
   } catch (error) {
     console.error("Pay endpoint error:", error);
@@ -119,4 +136,5 @@ export async function POST(req: NextRequest) {
       { status: 500, headers: corsHeaders }
     );
   }
+   
 }

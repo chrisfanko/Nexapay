@@ -17,6 +17,11 @@ type Session = {
   status: string;
   successUrl?: string;
   cancelUrl?: string;
+
+  // Add fee fields
+  grossAmount: number;
+  nexapayFee: number;
+  merchantAmount: number;
 };
 
 const PAYMENT_METHODS = [
@@ -170,12 +175,18 @@ export default function CheckoutPage() {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
-          {/* Amount banner */}
+            
+        {/* Amount banner */}
           <div className="bg-blue-600 px-6 py-4 text-white text-center">
             <p className="text-xs text-blue-100 mb-1">Pay to {session.merchantName}</p>
             <p className="text-3xl font-black">
-              {session.currency} {session.amount.toLocaleString()}
+              {session.currency} {(session.grossAmount || session.amount).toLocaleString()}
             </p>
+            {session.nexapayFee > 0 && (
+              <p className="text-xs text-blue-200 mt-1">
+                Includes {session.currency} {session.nexapayFee.toLocaleString()} processing fee
+              </p>
+            )}
             {session.description && (
               <p className="text-xs text-blue-100 mt-1">{session.description}</p>
             )}
@@ -255,7 +266,7 @@ export default function CheckoutPage() {
                 ) : isPayPal && !name ? (
                   "Enter your name to continue"
                 ) : (
-                  `Pay ${session.currency} ${session.amount.toLocaleString()}`
+                  `Pay ${session.currency} ${(session.grossAmount || session.amount).toLocaleString()}`
                 )}
               </button>
             )}

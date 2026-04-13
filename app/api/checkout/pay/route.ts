@@ -18,6 +18,15 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
     const session = await PaymentSession.findOne({ sessionId });
+    // Save customer info to session
+await PaymentSession.findOneAndUpdate(
+  { sessionId },
+  {
+    ...(name && { customerName: name }),
+    ...(phone && { customerPhone: phone }),
+    ...(email && { customerEmail: email }),
+  }
+);
 
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -31,19 +40,19 @@ export async function POST(req: NextRequest) {
     const normalizedMethod = method.toLowerCase();
 
     // ── NotchPay (MTN, Orange, Visa, Mastercard) ──
-    if (NOTCHPAY_METHODS.includes(normalizedMethod)) {
-      const res = await fetch(`${baseUrl}/api/notchpay/initialize`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: session.amount,
-          currency: session.currency,
-          email: email || session.customerEmail,
-          name: name || session.customerName,
-          phone: phone || session.customerPhone,
-          channel: normalizedMethod,
-        }),
-      });
+      if (NOTCHPAY_METHODS.includes(normalizedMethod)) {
+    const res = await fetch(`${baseUrl}/api/notchpay/initialize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: session.grossAmount || session.amount, // use grossAmount!
+        currency: session.currency,
+        email: email || session.customerEmail,
+        name: name || session.customerName,
+        phone: phone || session.customerPhone,
+        channel: normalizedMethod,
+      }),
+    });
 
       const data = await res.json();
 

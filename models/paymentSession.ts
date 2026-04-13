@@ -32,6 +32,12 @@ export interface IPaymentSession extends Document {
 
   createdAt: Date;
   updatedAt: Date;
+  
+  merchantAmount: number;
+  nexapayFee: number;
+  grossAmount: number;
+  providerFee: number;
+  netAmount: number;
 }
 
 const PaymentSessionSchema: Schema<IPaymentSession> = new mongoose.Schema(
@@ -68,6 +74,12 @@ const PaymentSessionSchema: Schema<IPaymentSession> = new mongoose.Schema(
 
     // Result
     transactionReference: { type: String },
+ 
+    merchantAmount: { type: Number },
+    nexapayFee: { type: Number },
+    grossAmount: { type: Number },
+    providerFee: { type: Number },
+    netAmount: { type: Number },
 
     // Expiry — session expires after 1 hour
     expiresAt: {

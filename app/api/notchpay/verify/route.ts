@@ -50,11 +50,15 @@ export async function GET(req: NextRequest) {
 
   const isComplete = tx.status === "complete";
 
-  // 2. Update transaction in MongoDB
+  // 2. Find payment session FIRST — needed for both branches below
+  await connectToDatabase();
+  const paymentSession = await PaymentSession.findOne({
+    transactionReference: reference,
+  }).catch(() => null);
+
+  // 3. Update transaction in MongoDB
   let savedTransaction = null;
   try {
-    await connectToDatabase();
-
     const existing = await Transaction.findOne({ reference });
 
     if (existing) {
@@ -63,36 +67,34 @@ export async function GET(req: NextRequest) {
         {
           status: isComplete ? "complete" : "failed",
           failureReason: isComplete ? undefined : tx.message || "Payment was not completed",
+          ...(paymentSession?.customerName && { customerName: paymentSession.customerName }),
+          ...(paymentSession?.customerPhone && { customerPhone: paymentSession.customerPhone }),
         },
         { new: true }
       );
     } else {
-      // Try to find userId from PaymentSession
-      const paymentSession = await PaymentSession.findOne({ 
-        transactionReference: reference 
-      });
-
-      savedTransaction = await Transaction.create({
-        reference,
-        provider: "notchpay",
-        channel: tx.channel || "Orange Money",
-        status: isComplete ? "complete" : "failed",
-        currency: tx.currency || "XAF",
-        mode: paymentSession?.mode || "live",
-        ...(paymentSession?.merchantId && { userId: paymentSession.merchantId }),
-        merchantAmount: tx.amount || 0,
-        nexapayFee: 0,
-        grossAmount: tx.amount || 0,
-        providerFee: 0,
-        netAmount: tx.amount || 0,
-        customerName: tx.customer?.name || "Unknown",
-        customerPhone: tx.customer?.phone || undefined,
-        failureReason: isComplete ? undefined : tx.message || "Payment was not completed",
-      });
+          savedTransaction = await Transaction.create({
+            reference,
+            provider: "notchpay",
+            channel: tx.channel || "Orange Money",
+            status: isComplete ? "complete" : "failed",
+            currency: tx.currency || "XAF",
+            mode: paymentSession?.mode || "live",
+            ...(paymentSession?.merchantId && { userId: paymentSession.merchantId }),
+            // Use stored fee breakdown from session
+            merchantAmount: paymentSession?.merchantAmount || tx.amount || 0,
+            nexapayFee: paymentSession?.nexapayFee || 0,
+            grossAmount: paymentSession?.grossAmount || tx.amount || 0,
+            providerFee: paymentSession?.providerFee || 0,
+            netAmount: paymentSession?.netAmount || tx.amount || 0,
+            customerName: paymentSession?.customerName || tx.customer?.name || "Unknown",
+            customerPhone: paymentSession?.customerPhone || tx.customer?.phone || undefined,
+            failureReason: isComplete ? undefined : tx.message || "Payment was not completed",
+          });
     }
 
-    // 3. Mark session as completed
-    if (isComplete) {
+    // 4. Mark session as completed
+    if (isComplete && paymentSession) {
       await PaymentSession.findOneAndUpdate(
         { transactionReference: reference },
         { status: "completed" }
@@ -104,7 +106,7 @@ export async function GET(req: NextRequest) {
     console.error("Failed to update transaction in database:", dbError);
   }
 
-  // 4. Deliver webhook if transaction belongs to a merchant
+  // 5. Deliver webhook if transaction belongs to a merchant
   if (savedTransaction?.userId) {
     await deliverWebhook(savedTransaction.userId.toString(), {
       event: isComplete ? "payment.complete" : "payment.failed",
@@ -122,11 +124,8 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // 5. Redirect to merchant's successUrl or cancelUrl instead of Nexapay page
+  // 6. Redirect to merchant's successUrl or cancelUrl
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-  const paymentSession = await PaymentSession.findOne({ 
-    transactionReference: reference 
-  }).catch(() => null);
 
   if (paymentSession) {
     if (isComplete && paymentSession.successUrl) {
@@ -140,7 +139,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Fallback — redirect to Nexapay success page if no merchant URL
+  // Fallback
   return NextResponse.redirect(
     `${baseUrl}/payment/success?reference=${reference}`
   );
