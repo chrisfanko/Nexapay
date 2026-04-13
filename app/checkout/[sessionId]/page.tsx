@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 
 type Session = {
   sessionId: string;
@@ -20,11 +19,11 @@ type Session = {
 };
 
 const PAYMENT_METHODS = [
-  { id: "mtn_money", label: "MTN Mobile Money", icon: "📱", currency: ["XAF", "XOF"] },
-  { id: "orange_money", label: "Orange Money", icon: "🟠", currency: ["XAF", "XOF"] },
-  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD","XAF"] },
-  { id: "visa", label: "Visa Card", icon: "💳", currency: ["USD", "EUR", "XAF"] },
-  { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"] },
+  { id: "mtn_money", label: "MTN Money", icon: "📱", currency: ["XAF", "XOF"], needsPhone: true, needsEmail: false },
+  { id: "orange_money", label: "Orange Money", icon: "🟠", currency: ["XAF", "XOF"], needsPhone: true, needsEmail: false },
+  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD", "XAF"], needsPhone: false, needsEmail: true },
+  { id: "visa", label: "Visa", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: true },
+  { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: true },
 ];
 
 export default function CheckoutPage() {
@@ -41,7 +40,6 @@ export default function CheckoutPage() {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
 
-  // Fetch session
   useEffect(() => {
     fetch(`/api/checkout/session?sessionId=${sessionId}`)
       .then((res) => res.json())
@@ -50,7 +48,6 @@ export default function CheckoutPage() {
           setError(data.error);
         } else {
           setSession(data.session);
-          // Pre-fill customer info if provided
           if (data.session.customerName) setName(data.session.customerName);
           if (data.session.customerEmail) setEmail(data.session.customerEmail);
           if (data.session.customerPhone) setPhone(data.session.customerPhone);
@@ -62,6 +59,14 @@ export default function CheckoutPage() {
         setLoading(false);
       });
   }, [sessionId]);
+
+  const selectedMethodData = PAYMENT_METHODS.find((m) => m.id === selectedMethod);
+  const needsPhone = selectedMethodData?.needsPhone ?? false;
+  const needsEmail = selectedMethodData?.needsEmail ?? false;
+
+  const availableMethods = PAYMENT_METHODS.filter(
+    (m) => !session || m.currency.includes(session.currency)
+  );
 
   const handlePay = async () => {
     if (!selectedMethod || !session) return;
@@ -89,11 +94,9 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Redirect to payment provider URL
       if (data.authorization_url) {
         router.push(data.authorization_url);
       } else if (data.links) {
-        // PayPal returns links array
         const approveLink = data.links.find(
           (l: { rel: string; href: string }) => l.rel === "approve"
         );
@@ -108,18 +111,15 @@ export default function CheckoutPage() {
     }
   };
 
-  // Filter methods based on currency
-  const availableMethods = PAYMENT_METHODS.filter(
-    (m) => !session || m.currency.includes(session.currency)
-  );
+  const isFormValid =
+    name &&
+    (!needsPhone || phone) &&
+    (!needsEmail || email) &&
+    selectedMethod;
 
-  const needsPhone = ["mtn_money", "orange_money"].includes(selectedMethod);
-  const isPayPal = selectedMethod === "paypal";
-
-  // Loading state
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+      <main className="min-h-screen bg-linear-to-br from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500">Loading payment...</p>
@@ -128,7 +128,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Error state
   if (error || !session) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
@@ -146,7 +145,7 @@ export default function CheckoutPage() {
       <div className="w-full max-w-md">
 
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <div className="inline-flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-black text-sm">N</span>
@@ -166,33 +165,26 @@ export default function CheckoutPage() {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
           {/* Amount banner */}
-          <div className="bg-blue-600 px-6 py-6 text-white text-center">
-            <p className="text-sm text-blue-100 mb-1">Pay to {session.merchantName}</p>
-            <p className="text-4xl font-black">
+          <div className="bg-blue-600 px-6 py-4 text-white text-center">
+            <p className="text-xs text-blue-100 mb-1">Pay to {session.merchantName}</p>
+            <p className="text-3xl font-black">
               {session.currency} {session.amount.toLocaleString()}
             </p>
             {session.description && (
-              <p className="text-sm text-blue-100 mt-1">{session.description}</p>
+              <p className="text-xs text-blue-100 mt-1">{session.description}</p>
             )}
           </div>
 
-          <div className="p-6 space-y-5">
+          <div className="p-5 space-y-4">
 
             {/* Customer info */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <input
                 type="text"
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
-              />
-              <input
-                type="email"
-                placeholder="Email (optional)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
               />
               {needsPhone && (
                 <input
@@ -200,29 +192,38 @@ export default function CheckoutPage() {
                   placeholder="Phone Number (e.g. 6XXXXXXXX)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+                />
+              )}
+              {needsEmail && (
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
                 />
               )}
             </div>
 
-            {/* Payment methods */}
+            {/* Payment methods — 2 columns */}
             <div>
-              <p className="text-sm font-medium text-gray-500 mb-2">Select payment method</p>
-              <div className="grid grid-cols-1 gap-2">
+              <p className="text-xs font-medium text-gray-500 mb-2">Select payment method</p>
+              <div className="grid grid-cols-2 gap-2">
                 {availableMethods.map((method) => (
                   <button
                     key={method.id}
                     onClick={() => setSelectedMethod(method.id)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                    className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border-2 transition-all text-center ${
                       selectedMethod === method.id
                         ? "border-blue-600 bg-blue-50"
                         : "border-gray-200 hover:border-blue-300"
                     }`}
                   >
-                    <span className="text-2xl">{method.icon}</span>
-                    <span className="font-medium text-gray-700">{method.label}</span>
+                    <span className="text-xl">{method.icon}</span>
+                    <span className="text-xs font-medium text-gray-700 leading-tight">{method.label}</span>
                     {selectedMethod === method.id && (
-                      <span className="ml-auto text-blue-600">✓</span>
+                      <span className="text-xs text-blue-600">✓</span>
                     )}
                   </button>
                 ))}
@@ -231,18 +232,18 @@ export default function CheckoutPage() {
 
             {/* Error */}
             {payError && (
-              <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{payError}</p>
+              <p className="text-xs text-red-600 bg-red-50 px-4 py-2 rounded-lg">{payError}</p>
             )}
 
             {/* Pay button */}
             <button
               onClick={handlePay}
-              disabled={!selectedMethod || !name || (needsPhone && !phone) || paying}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors text-lg"
+              disabled={!isFormValid || paying}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
             >
               {paying ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Processing...
                 </span>
               ) : (
@@ -254,7 +255,7 @@ export default function CheckoutPage() {
             {session.cancelUrl && (
               <button
                 onClick={() => router.push(session.cancelUrl!)}
-                className="w-full text-sm text-gray-400 hover:text-gray-600 text-center"
+                className="w-full text-xs text-gray-400 hover:text-gray-600 text-center"
               >
                 Cancel and return to merchant
               </button>
