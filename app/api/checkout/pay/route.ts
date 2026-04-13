@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo_db";
 import PaymentSession from "@/models/paymentSession";
-import { getFeeBreakdown } from "@/lib/fees";
 
 const NOTCHPAY_METHODS = ["mtn_money", "orange_money", "mobile_money", "visa", "mastercard"];
+const PAYPAL_CURRENCIES = ["USD", "EUR", "GBP", "CAD"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,10 +48,13 @@ export async function POST(req: NextRequest) {
       const data = await res.json();
 
       if (!res.ok) {
-        return NextResponse.json({ error: data.error || "Payment failed" }, { status: 400 });
+        return NextResponse.json(
+          { error: data.error || "Payment failed" },
+          { status: 400 }
+        );
       }
 
-      // Update session with transaction reference
+      // Save transaction reference to session
       await PaymentSession.findOneAndUpdate(
         { sessionId },
         { transactionReference: data?.transaction?.reference }
@@ -61,32 +64,51 @@ export async function POST(req: NextRequest) {
     }
 
     // ── PayPal ──
-    if (method === "paypal") {
+    if (normalizedMethod === "paypal") {
+      // PayPal doesn't support XAF — default to USD if currency not supported
+      const paypalCurrency = PAYPAL_CURRENCIES.includes(session.currency)
+        ? session.currency
+        : "USD";
+
+      // PayPal works with decimals — convert if XAF (no decimals)
+      const paypalAmount = session.currency === "XAF"
+        ? (session.amount / 655).toFixed(2) // convert XAF to USD approx
+        : session.amount.toFixed(2);
+
       const res = await fetch(`${baseUrl}/api/paypal/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: session.amount,
-          currency: session.currency || "USD",
-          description: session.description,
+          amount: paypalAmount,
+          currency: paypalCurrency,
+          description: session.description || "Payment via NexaPay",
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        return NextResponse.json({ error: data.error || "PayPal order failed" }, { status: 400 });
+        console.error("PayPal order error:", data);
+        return NextResponse.json(
+          { error: data.error || "PayPal order failed" },
+          { status: 400 }
+        );
       }
 
+      // Save PayPal order ID to session
       await PaymentSession.findOneAndUpdate(
         { sessionId },
         { transactionReference: data.id }
       );
 
+      // Return the full PayPal response including links
       return NextResponse.json(data);
     }
 
-    return NextResponse.json({ error: "Unsupported payment method" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Unsupported payment method" },
+      { status: 400 }
+    );
 
   } catch (error) {
     console.error("Checkout pay error:", error);

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import PaypalButton from "@/components/ui/PaypalButton";
 
 type Session = {
   sessionId: string;
@@ -21,9 +22,9 @@ type Session = {
 const PAYMENT_METHODS = [
   { id: "mtn_money", label: "MTN Money", icon: "📱", currency: ["XAF", "XOF"], needsPhone: true, needsEmail: false },
   { id: "orange_money", label: "Orange Money", icon: "🟠", currency: ["XAF", "XOF"], needsPhone: true, needsEmail: false },
-  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD", "XAF"], needsPhone: false, needsEmail: true },
-  { id: "visa", label: "Visa", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: true },
-  { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: true },
+  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD", "XAF"], needsPhone: false, needsEmail: false },
+  { id: "visa", label: "Visa", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: false },
+  { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false, needsEmail: false },
 ];
 
 export default function CheckoutPage() {
@@ -62,7 +63,8 @@ export default function CheckoutPage() {
 
   const selectedMethodData = PAYMENT_METHODS.find((m) => m.id === selectedMethod);
   const needsPhone = selectedMethodData?.needsPhone ?? false;
-  const needsEmail = selectedMethodData?.needsEmail ?? false;
+  
+  const isPayPal = selectedMethod === "paypal";
 
   const availableMethods = PAYMENT_METHODS.filter(
     (m) => !session || m.currency.includes(session.currency)
@@ -96,11 +98,6 @@ export default function CheckoutPage() {
 
       if (data.authorization_url) {
         router.push(data.authorization_url);
-      } else if (data.links) {
-        const approveLink = data.links.find(
-          (l: { rel: string; href: string }) => l.rel === "approve"
-        );
-        if (approveLink) router.push(approveLink.href);
       } else {
         setPayError("Could not get payment URL. Please try again.");
         setPaying(false);
@@ -114,7 +111,7 @@ export default function CheckoutPage() {
   const isFormValid =
     name &&
     (!needsPhone || phone) &&
-    (!needsEmail || email) &&
+    
     selectedMethod;
 
   if (loading) {
@@ -139,6 +136,15 @@ export default function CheckoutPage() {
       </main>
     );
   }
+
+  // PayPal amount handling
+  const paypalCurrencies = ["USD", "EUR", "GBP", "CAD"];
+  const paypalCurrency = paypalCurrencies.includes(session.currency)
+    ? session.currency
+    : "USD";
+  const paypalAmount = session.currency === "XAF"
+    ? (session.amount / 655).toFixed(2)
+    : session.amount.toFixed(2);
 
   return (
     <main className="min-h-screen bg-linear-to-br from-blue-50 to-white flex items-center justify-center p-4">
@@ -195,15 +201,7 @@ export default function CheckoutPage() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
                 />
               )}
-              {needsEmail && (
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-                />
-              )}
+               
             </div>
 
             {/* Payment methods — 2 columns */}
@@ -235,21 +233,32 @@ export default function CheckoutPage() {
               <p className="text-xs text-red-600 bg-red-50 px-4 py-2 rounded-lg">{payError}</p>
             )}
 
-            {/* Pay button */}
-            <button
-              onClick={handlePay}
-              disabled={!isFormValid || paying}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
-            >
-              {paying ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </span>
-              ) : (
-                `Pay ${session.currency} ${session.amount.toLocaleString()}`
-              )}
-            </button>
+            {/* PayPal button OR regular pay button */}
+            {isPayPal && name ? (
+              <PaypalButton
+                amount={paypalAmount}
+                currency={paypalCurrency}
+                sessionId={sessionId as string}
+                redirectUrl={session.successUrl}
+              />
+            ) : (
+              <button
+                onClick={handlePay}
+                disabled={!isFormValid || paying || isPayPal}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
+              >
+                {paying ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </span>
+                ) : isPayPal && !name ? (
+                  "Enter your name to continue"
+                ) : (
+                  `Pay ${session.currency} ${session.amount.toLocaleString()}`
+                )}
+              </button>
+            )}
 
             {/* Cancel */}
             {session.cancelUrl && (

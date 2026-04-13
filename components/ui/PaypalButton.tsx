@@ -7,11 +7,15 @@ import { useRouter } from "next/navigation";
 interface PaypalButtonProps {
   amount?: string;
   currency?: string;
+  sessionId?: string;
+  redirectUrl?: string;
 }
 
 export default function PaypalButton({
   amount = "10.00",
   currency = "USD",
+  sessionId,
+  redirectUrl,
 }: PaypalButtonProps) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "";
   const router = useRouter();
@@ -53,21 +57,26 @@ export default function PaypalButton({
           }}
           createOrder={async () => {
             try {
-              const res = await fetch("/api/paypal/create-order", {
+              // Use session-based endpoint if sessionId provided
+              const endpoint = sessionId
+                ? "/api/checkout/pay"
+                : "/api/paypal/create-order";
+
+              const body = sessionId
+                ? { sessionId, method: "paypal" }
+                : { amount, currency };
+
+              const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount, currency }),
+                body: JSON.stringify(body),
               });
 
-              if (!res.ok) {
-                throw new Error("Failed to create order");
-              }
+              if (!res.ok) throw new Error("Failed to create order");
 
               const data = await res.json();
 
-              if (!data.id) {
-                throw new Error("No order ID received from server");
-              }
+              if (!data.id) throw new Error("No order ID received");
 
               return data.id;
             } catch (error) {
@@ -89,13 +98,23 @@ export default function PaypalButton({
               if (response.ok) {
                 setStatus("success");
                 setTimeout(() => {
-                  router.push("/payment/success");
-                }, 2000);
+                  // Use redirect_url from capture response, or fallback
+                  const destination =
+                    result.redirect_url ||
+                    redirectUrl ||
+                    "/payment/success";
+                  router.push(destination);
+                }, 1500);
               } else {
-                setStatus("error");
-                setErrorMessage("Payment capture failed. Please contact support.");
+                // Redirect to cancel URL if capture failed
+                if (result.redirect) {
+                  router.push(result.redirect);
+                } else {
+                  setStatus("error");
+                  setErrorMessage("Payment capture failed. Please contact support.");
+                }
               }
-            } catch (err) {
+            } catch {
               setStatus("error");
               setErrorMessage("An unexpected error occurred.");
             }
