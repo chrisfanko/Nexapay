@@ -1,6 +1,9 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 const Trusted = () => {
+  const t = useTranslations("trusted");
+
   const logos = [
     { name: "PayPal", src: "/logos/paypal.png" },
     { name: "Visa", src: "/logos/visa.png" },
@@ -18,9 +21,7 @@ const Trusted = () => {
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
-
         .trusted-section { font-family: 'DM Sans', sans-serif; }
-
         .trusted-logo-wrap {
           position: relative;
           width: 120px;
@@ -28,11 +29,7 @@ const Trusted = () => {
           transition: transform 0.3s;
           opacity: 1;
         }
-
-        .trusted-logo-wrap:hover {
-          transform: scale(1.1);
-        }
-
+        .trusted-logo-wrap:hover { transform: scale(1.1); }
         .trusted-divider {
           height: 1px;
           background: linear-gradient(90deg, transparent, rgba(30,111,255,0.3), rgba(0,212,170,0.3), transparent);
@@ -52,7 +49,7 @@ const Trusted = () => {
           textTransform: "uppercase",
           marginBottom: 36,
         }}>
-          Trusted payment methods we support
+          {t("label")}
         </p>
 
         <div style={{

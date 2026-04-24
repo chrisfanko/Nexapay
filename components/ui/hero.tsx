@@ -1,20 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 const Hero = () => {
+  const t = useTranslations("hero");
+
   return (
     <section className="min-h-screen relative flex items-center justify-center px-6">
-      
+
       {/* Background Image */}
       <Image
-        src="/hero.jpg"  
+        src="/hero.jpg"
         alt="Hero background"
         fill
         className="object-cover"
         priority
       />
 
-      {/* Dark overlay so text is readable */}
+      {/* Dark overlay */}
       <div className="absolute inset-0 bg-blue-900/60" />
 
       {/* Content */}
@@ -23,19 +26,18 @@ const Hero = () => {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-medium px-4 py-2 rounded-full mb-6">
           <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-          Trusted by 10,000+ businesses across Africa
+          {t("badge")}
         </div>
 
         {/* Headline */}
         <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
-          One Gateway. <br />
-          <span className="text-blue-300">Every Payment.</span>
+          {t("headline1")} <br />
+          <span className="text-blue-300">{t("headline2")}</span>
         </h1>
 
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-10">
-          Accept payments from anywhere in the world — PayPal, Visa, Mastercard,
-          Orange Money, MTN MoMo and more. Fast, secure, and reliable.
+          {t("subheadline")}
         </p>
 
         {/* Buttons */}
@@ -44,13 +46,13 @@ const Hero = () => {
             href="/sign-up"
             className="bg-white text-blue-900 font-semibold px-8 py-4 rounded-xl hover:bg-blue-50 transition-colors w-full sm:w-auto"
           >
-            Get Started 
+            {t("getStarted")}
           </Link>
           <Link
             href="/solutions"
             className="bg-white/20 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/30 transition-colors w-full sm:w-auto border border-white/30"
           >
-            View Solutions →
+            {t("viewSolutions")}
           </Link>
         </div>
 

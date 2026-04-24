@@ -1,25 +1,27 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const Footer = () => {
+  const t = useTranslations("footer");
   const currentYear = new Date().getFullYear();
 
   const links = {
-    Product: [
-      { label: "Solutions", href: "/solutions" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Developers", href: "/developers" },
-      { label: "Changelog", href: "/changelog" },
+    [t("product")]: [
+      { label: t("links.solutions"), href: "/solutions" },
+      { label: t("links.pricing"), href: "/pricing" },
+      { label: t("links.developers"), href: "/developers" },
+      { label: t("links.changelog"), href: "/changelog" },
     ],
-    Company: [
-      { label: "About", href: "/about" },
-      { label: "Blog", href: "/blog" },
-      { label: "Careers", href: "/careers" },
-      { label: "Contact", href: "/contact" },
+    [t("company")]: [
+      { label: t("links.about"), href: "/about" },
+      { label: t("links.blog"), href: "/blog" },
+      { label: t("links.careers"), href: "/careers" },
+      { label: t("links.contact"), href: "/contact" },
     ],
-    Legal: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
+    [t("legal")]: [
+      { label: t("links.privacy"), href: "/privacy" },
+      { label: t("links.terms"), href: "/terms" },
+      { label: t("links.cookies"), href: "/cookies" },
     ],
   };
 
@@ -78,15 +80,15 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-zinc-500 max-w-xs">
-              One gateway. Every payment. Built for Africa and beyond — fast, secure, and reliable.
+              {t("tagline")}
             </p>
-
             {/* Socials */}
             <div className="flex items-center gap-3 mt-6">
-              {socials.map((social) => (
-                <a
+               <div className="flex items-center gap-3 mt-6">
+                {socials.map((social) => (
+                 <a
                   key={social.label}
-                  href={social.href}
+                  href={social.href} 
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
@@ -95,6 +97,7 @@ const Footer = () => {
                   {social.icon}
                 </a>
               ))}
+            </div>
             </div>
           </div>
 
@@ -123,10 +126,10 @@ const Footer = () => {
         {/* Divider */}
         <div className="border-t border-zinc-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-zinc-600">
-            © {currentYear} NexaPay. All rights reserved.
+            © {currentYear} NexaPay. {t("copyright")}
           </p>
           <p className="text-xs text-zinc-600">
-            Built with ❤️ for Africa & the world.
+            {t("builtWith")}
           </p>
         </div>
       </div>

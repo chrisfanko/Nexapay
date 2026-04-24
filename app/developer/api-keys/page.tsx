@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Copy, RefreshCw, Eye, EyeOff, CheckCheck, FlaskConical, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function ApiKeysPage() {
+  const t = useTranslations("apiKeys");
   const { data: session } = useSession();
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [testApiKey, setTestApiKey] = useState<string | null>(null);
@@ -40,29 +42,26 @@ export default function ApiKeysPage() {
       setCopiedLive(true);
       setTimeout(() => setCopiedLive(false), 2000);
     }
-    toast.success(`${isTest ? "Test" : "Live"} API key copied!`);
+    toast.success(isTest ? t("testKey.copied") : t("liveKey.copied"));
   };
 
   const handleRegenerate = async () => {
-    const confirmed = window.confirm(
-      "Are you sure? Your old live API key will stop working immediately."
-    );
+    const confirmed = window.confirm(t("regenerate.confirm"));
     if (!confirmed) return;
 
     setRegenerating(true);
     try {
       const res = await fetch("/api/developer/regenerate-key", { method: "POST" });
       const data = await res.json();
-
       if (res.ok) {
         setApiKey(data.apiKey);
         setVisibleLive(true);
-        toast.success("Live API key regenerated!");
+        toast.success(t("regenerate.success"));
       } else {
-        toast.error(data.error || "Failed to regenerate key.");
+        toast.error(data.error || t("regenerate.error"));
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("regenerate.errorNetwork"));
     } finally {
       setRegenerating(false);
     }
@@ -72,13 +71,23 @@ export default function ApiKeysPage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-zinc-900">API Keys</h1>
+        <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
         <p className="text-gray-500 mt-2">
-          Use your API keys to authenticate requests to the NexaPay API.
-          Use the <span className="font-semibold text-amber-600">test key</span> for development and the{" "}
-          <span className="font-semibold text-green-600">live key</span> for production.
+          {t("subtitle").split("test key").map((part, i) =>
+            i === 0 ? (
+              <span key={i}>{part}<span className="font-semibold text-amber-600">test key</span></span>
+            ) : (
+              <span key={i}>{part.split("live key").map((p, j) =>
+                j === 0 ? (
+                  <span key={j}>{p}<span className="font-semibold text-green-600">live key</span></span>
+                ) : (
+                  <span key={j}>{p}</span>
+                )
+              )}</span>
+            )
+          )}
         </p>
-        <p className="text-xs text-gray-400 mt-1">Signed in as {session?.user?.email}</p>
+        <p className="text-xs text-gray-400 mt-1">{t("signedInAs")} {session?.user?.email}</p>
       </div>
 
       {/* Test Key Card */}
@@ -89,12 +98,12 @@ export default function ApiKeysPage() {
               <FlaskConical className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-900">Test API Key</h2>
-              <p className="text-xs text-gray-400 mt-0.5">For development & testing — no approval needed</p>
+              <h2 className="text-sm font-bold text-zinc-900">{t("testKey.title")}</h2>
+              <p className="text-xs text-gray-400 mt-0.5">{t("testKey.desc")}</p>
             </div>
           </div>
           <span className="bg-amber-100 text-amber-600 text-xs font-semibold px-3 py-1 rounded-full">
-            Sandbox
+            {t("testKey.badge")}
           </span>
         </div>
 
@@ -105,28 +114,19 @@ export default function ApiKeysPage() {
             <div className="flex-1 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 font-mono text-sm text-gray-700 overflow-hidden">
               {visibleTest ? testApiKey : maskKey(testApiKey)}
             </div>
-            <button
-              onClick={() => setVisibleTest(!visibleTest)}
-              className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500"
-            >
+            <button onClick={() => setVisibleTest(!visibleTest)} className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500">
               {visibleTest ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
-            <button
-              onClick={() => handleCopy(testApiKey, true)}
-              className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500"
-            >
-              {copiedTest
-                ? <CheckCheck className="w-4 h-4 text-green-500" />
-                : <Copy className="w-4 h-4" />
-              }
+            <button onClick={() => handleCopy(testApiKey, true)} className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500">
+              {copiedTest ? <CheckCheck className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
         ) : (
-          <p className="text-sm text-gray-400">No test key found.</p>
+          <p className="text-sm text-gray-400">{t("testKey.notFound")}</p>
         )}
 
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
-          ⚡ Test transactions are marked as <strong>TEST</strong> and processed through sandbox. No real money moves.
+          ⚡ {t("testKey.notice")}
         </div>
       </div>
 
@@ -138,16 +138,14 @@ export default function ApiKeysPage() {
               <Zap className="w-4 h-4 text-green-600" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-900">Live API Key</h2>
-              <p className="text-xs text-gray-400 mt-0.5">For production — requires approved business</p>
+              <h2 className="text-sm font-bold text-zinc-900">{t("liveKey.title")}</h2>
+              <p className="text-xs text-gray-400 mt-0.5">{t("liveKey.desc")}</p>
             </div>
           </div>
           <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-            merchantStatus === "approved"
-              ? "bg-green-100 text-green-600"
-              : "bg-gray-100 text-gray-500"
+            merchantStatus === "approved" ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"
           }`}>
-            {merchantStatus === "approved" ? "Active" : "Requires Approval"}
+            {merchantStatus === "approved" ? t("liveKey.badgeActive") : t("liveKey.badgePending")}
           </span>
         </div>
 
@@ -157,48 +155,37 @@ export default function ApiKeysPage() {
           <>
             {merchantStatus !== "approved" && (
               <div className="mb-3 bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-500">
-                🔒 Your live key is ready but will only work after your business is approved by our team.
+                🔒 {t("liveKey.lockNotice")}
               </div>
             )}
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 font-mono text-sm text-gray-700 overflow-hidden">
                 {visibleLive ? apiKey : maskKey(apiKey)}
               </div>
-              <button
-                onClick={() => setVisibleLive(!visibleLive)}
-                className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500"
-              >
+              <button onClick={() => setVisibleLive(!visibleLive)} className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500">
                 {visibleLive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-              <button
-                onClick={() => handleCopy(apiKey, false)}
-                className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500"
-              >
-                {copiedLive
-                  ? <CheckCheck className="w-4 h-4 text-green-500" />
-                  : <Copy className="w-4 h-4" />
-                }
+              <button onClick={() => handleCopy(apiKey, false)} className="p-2.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition text-gray-500">
+                {copiedLive ? <CheckCheck className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
           </>
         ) : (
-          <p className="text-sm text-gray-400">No live key found.</p>
+          <p className="text-sm text-gray-400">{t("liveKey.notFound")}</p>
         )}
       </div>
 
       {/* Regenerate live key */}
       <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-6">
-        <h2 className="text-sm font-semibold text-zinc-900 mb-1">Regenerate Live Key</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          If your live key is compromised, regenerate it immediately. Your old key will stop working right away.
-        </p>
+        <h2 className="text-sm font-semibold text-zinc-900 mb-1">{t("regenerate.title")}</h2>
+        <p className="text-sm text-gray-500 mb-4">{t("regenerate.desc")}</p>
         <button
           onClick={handleRegenerate}
           disabled={regenerating}
           className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-red-100 transition disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${regenerating ? "animate-spin" : ""}`} />
-          {regenerating ? "Regenerating..." : "Regenerate Live Key"}
+          {regenerating ? t("regenerate.loading") : t("regenerate.btn")}
         </button>
       </div>
     </div>

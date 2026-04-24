@@ -1,0 +1,468 @@
+{
+  "nav": {
+    "about": "À propos",
+    "solutions": "Solutions",
+    "developer": "Développeur",
+    "contact": "Contact",
+    "pricing": "Tarifs"
+  },
+  "language": {
+    "select": "Langue",
+    "en": "Anglais",
+    "fr": "Français",
+    "es": "Espagnol"
+     
+  },
+  "hero": {
+    "badge": "Plus de 10 000 entreprises nous font confiance en Afrique",
+    "headline1": "Une seule passerelle.",
+    "headline2": "Tous les paiements.",
+    "subheadline": "Acceptez des paiements de partout dans le monde — PayPal, Visa, Mastercard, Orange Money, MTN MoMo et plus. Rapide, sécurisé et fiable.",
+    "getStarted": "Commencer",
+    "viewSolutions": "Voir les solutions →"
+  },
+  "features": {
+  "badge": "Pourquoi NexaPay",
+  "headline1": "Tout ce dont vous avez besoin pour",
+  "headline2": "accepter les paiements",
+  "subheadline": "Conçu pour les entreprises de toutes tailles — des startups aux grandes entreprises en Afrique et au-delà.",
+  "secure": {
+    "tag": "Sécurité",
+    "title": "Paiements sécurisés",
+    "description": "Le chiffrement bancaire et la détection des fraudes protègent chaque transaction."
+  },
+  "fast": {
+    "tag": "Rapidité",
+    "title": "Transactions rapides",
+    "description": "Paiements traités en quelques secondes — sans délais, sans attente, juste des résultats instantanés."
+  },
+  "global": {
+    "tag": "Mondial",
+    "title": "Support multi-devises",
+    "description": "Acceptez des paiements en plusieurs devises de clients du monde entier."
+  },
+  "mobile": {
+    "tag": "Mobile",
+    "title": "Compatible mobile",
+    "description": "Entièrement optimisé pour mobile — vos clients peuvent payer depuis n'importe quel appareil."
+  }
+  },
+  "howItWorks": {
+  "badge": "Comment ça marche",
+  "headline1": "3 étapes simples pour",
+  "headline2": "commencer",
+  "subheadline": "Démarrer avec NexaPay est rapide et facile. Aucune connaissance technique requise.",
+  "step": "Étape",
+  "step1": {
+    "title": "Créez votre compte",
+    "description": "Inscrivez-vous gratuitement en quelques minutes. Pas de paperasse, pas de frais cachés — créez votre compte et vous êtes prêt."
+  },
+  "step2": {
+    "title": "Choisissez un mode de paiement",
+    "description": "Sélectionnez parmi PayPal, Orange Money, MTN MoMo et plus. Nous couvrons tous les modes de paiement."
+  },
+  "step3": {
+    "title": "Payez instantanément",
+    "description": "Complétez votre paiement en quelques secondes. Rapide, sécurisé et fiable — à chaque fois."
+  }
+},
+"trusted": {
+  "label": "Méthodes de paiement de confiance que nous supportons"
+},
+"pricing": {
+  "badge": "Tarifs",
+  "headline1": "Un seul taux.",
+  "headline2": "Aucune surprise.",
+  "subheadline": "NexaPay facture un taux fixe unique par transaction réussie. Pas de frais mensuels. Pas de frais d'installation.",
+  "mostPopular": "Le plus populaire",
+  "starter": {
+    "name": "Débutant",
+    "per": "par transaction réussie",
+    "features": [
+      "Mobile Money (MTN, Orange)",
+      "Intégration PayPal",
+      "Accès clé API",
+      "Tableau de bord basique",
+      "Frais min. : 50 XAF"
+    ],
+    "cta": "Commencer gratuitement"
+  },
+  "growth": {
+    "name": "Croissance",
+    "per": "par transaction réussie",
+    "features": [
+      "Tout dans Débutant",
+      "Système de livraison webhook",
+      "Analyses complètes des transactions",
+      "Tableau de bord marchand",
+      "Support prioritaire"
+    ],
+    "cta": "Commencer →"
+  },
+  "enterprise": {
+    "name": "Entreprise",
+    "price": "Personnalisé",
+    "per": "tarification basée sur le volume",
+    "features": [
+      "Tout dans Croissance",
+      "Négociation de frais personnalisés",
+      "Gestionnaire de compte dédié",
+      "Garantie SLA & disponibilité",
+      "Intégrations personnalisées"
+    ],
+    "cta": "Nous contacter"
+  },
+  "calculator": {
+    "badge": "Calculateur de frais",
+    "title": "Voyez exactement ce que vous payez",
+    "label": "Montant de la transaction (XAF)",
+    "youCharge": "Vous facturez",
+    "nexapayFee": "Frais NexaPay",
+    "customerPays": "Le client paie",
+    "fullDetails": "Voir les détails complets des tarifs →"
+  }
+},
+"footer": {
+  "tagline": "Une passerelle. Tous les paiements. Conçu pour l'Afrique et au-delà — rapide, sécurisé et fiable.",
+  "product": "Produit",
+  "company": "Entreprise",
+  "legal": "Légal",
+  "links": {
+    "solutions": "Solutions",
+    "pricing": "Tarifs",
+    "developers": "Développeurs",
+    "changelog": "Changelog",
+    "about": "À propos",
+    "blog": "Blog",
+    "careers": "Carrières",
+    "contact": "Contact",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "cookies": "Politique des cookies"
+  },
+  "copyright": "Tous droits réservés.",
+  "builtWith": "Fait avec ❤️ pour l'Afrique & le monde."
+},
+"about": {
+  "hero": {
+    "tag": "Notre Histoire",
+    "title1": "Conçu pour",
+    "title2": "les bâtisseurs",
+    "title3": "d'Afrique",
+    "desc": "NexaPay est né d'une simple frustration — pourquoi les développeurs africains devraient-ils passer des mois à intégrer des systèmes de paiement qui devraient prendre des heures ?",
+    "cta": "Commencer à construire →",
+    "apiLabel": "Une API · Toutes les méthodes de paiement"
+  },
+  "stats": {
+    "transactions": "Transactions Traitées",
+    "merchants": "Marchands Intégrés",
+    "uptime": "Garantie de Disponibilité",
+    "methods": "Méthodes de Paiement"
+  },
+  "mission": {
+    "tag": "Notre Mission",
+    "title": "Démocratiser les paiements en Afrique",
+    "body1": "Nous croyons que chaque entreprise africaine — d'un fondateur solo à Yaoundé à une entreprise à Lagos — mérite un accès à une infrastructure de paiement de classe mondiale. NexaPay égalise les chances.",
+    "body2": "Notre plateforme connecte les réseaux Mobile Money, les processeurs de cartes internationaux et les portefeuilles numériques via une seule API unifiée. Construisez une fois, acceptez des paiements partout.",
+    "card1": { "title": "Couverture Pan-Africaine", "desc": "10+ pays et en croissance" },
+    "card2": { "title": "Traitement en Temps Réel", "desc": "Vitesses de transaction en moins d'une seconde" },
+    "card3": { "title": "Sécurité Bancaire", "desc": "Infrastructure conforme PCI-DSS" },
+    "card4": { "title": "Analytiques en Direct", "desc": "Visibilité complète sur vos revenus" }
+  },
+  "values": {
+    "tag": "Ce Que Nous Défendons",
+    "title": "Nos Valeurs Fondamentales",
+    "speed": { "title": "La Vitesse Avant Tout", "desc": "Chaque milliseconde compte. Nous sommes obsédés par les performances pour que vos clients n'attendent jamais." },
+    "security": { "title": "Sécurité par Défaut", "desc": "Chiffrement bancaire et détection des fraudes intégrés dans chaque transaction." },
+    "africa": { "title": "L'Afrique au Cœur", "desc": "Conçu spécifiquement pour les marchés africains — Mobile Money, devises locales, besoins locaux." },
+    "developer": { "title": "Obsédé par les Développeurs", "desc": "Des APIs propres, une bonne documentation et des outils qui rendent l'intégration agréable." }
+  },
+  "team": {
+    "tag": "Les Personnes",
+    "title": "Qui Construit NexaPay",
+    "desc": "Une équipe passionnée d'ingénieurs, de designers et d'experts en fintech unis par un seul objectif — faire fonctionner les paiements pour l'Afrique.",
+    "founders": { "name": "Fondateurs", "role": "Vision & Stratégie" },
+    "engineering": { "name": "Ingénierie", "role": "Produit & Infrastructure" },
+    "operations": { "name": "Opérations", "role": "Conformité & Finance" },
+    "support": { "name": "Support", "role": "Succès des Marchands" }
+  },
+  "cta": {
+    "title1": "Prêt à construire",
+    "title2": "quelque chose de grand ?",
+    "desc": "Rejoignez des centaines d'entreprises africaines qui traitent déjà des paiements avec NexaPay.",
+    "primary": "Commencer gratuitement →",
+    "secondary": "Nous contacter"
+  }
+},
+"contact": {
+  "hero": {
+    "tag": "Nous Contacter",
+    "title1": "Nous serions ravis",
+    "title2": "de vous entendre",
+    "subtitle": "Que vous soyez un développeur avec une question, une entreprise explorant NexaPay, ou simplement curieux — nous sommes là."
+  },
+  "options": {
+    "sales": { "title": "Ventes", "desc": "Intéressé par NexaPay pour votre entreprise ?" },
+    "support": { "title": "Support Technique", "desc": "Des problèmes avec votre intégration ?" },
+    "partners": { "title": "Partenariats", "desc": "Vous souhaitez vous associer à NexaPay ?" }
+  },
+  "form": {
+    "title": "Envoyez-nous un message",
+    "subtitle": "Remplissez le formulaire ci-dessous et nous vous répondrons dès que possible.",
+    "name": "Nom Complet",
+    "email": "Adresse Email",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Sélectionnez un sujet...",
+    "subjectOptions": {
+      "sales": "Demande de Vente",
+      "support": "Support Technique",
+      "partnership": "Partenariat",
+      "billing": "Facturation",
+      "other": "Autre"
+    },
+    "message": "Message",
+    "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+    "submit": "Envoyer le message →",
+    "sending": "Envoi en cours...",
+    "errorFallback": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "errorNetwork": "Impossible d'envoyer le message. Veuillez réessayer."
+  },
+  "success": {
+    "title": "Message Envoyé !",
+    "desc": "Merci de nous avoir contactés. Notre équipe vous répondra dans les 24 heures.",
+    "reset": "Envoyer un autre message"
+  }
+},
+"solutions": {
+  "title": "Choisissez un mode de paiement",
+  "subtitle": "Sélectionnez la solution de paiement qui vous convient le mieux",
+  "methods": {
+    "paypal": "Payez en toute sécurité avec votre compte PayPal",
+    "visa": "Payez avec votre carte Visa",
+    "mastercard": "Payez avec votre Mastercard",
+    "orange": "Payez avec le portefeuille mobile Orange Money",
+    "mtn": "Payez avec le portefeuille mobile MTN MoMo"
+  }
+},
+"prices": {
+  "hero": {
+    "tag": "Tarification Simple",
+    "title1": "Un seul taux.",
+    "title2": "Aucune surprise.",
+    "subtitle": "NexaPay facture un taux fixe unique par transaction réussie. Pas de frais d'installation, pas de frais mensuels, pas de coûts cachés.",
+    "feeLabel": "Frais NexaPay",
+    "feeUnit": "% par transaction",
+    "feeNote": "Minimum 50 XAF par transaction"
+  },
+  "means": {
+    "tag": "Ce Que Cela Signifie Pour Vous",
+    "title": "Une tarification pensée pour les créateurs",
+    "subtitle": "Pas de complexité. Juste une commission équitable sur chaque paiement réussi.",
+    "card1": { "title": "Payez Uniquement en Cas de Succès", "desc": "Vous n'êtes jamais facturé pour les transactions échouées ou en attente. NexaPay ne gagne que lorsque vous gagnez." },
+    "card2": { "title": "Transparence Totale", "desc": "Chaque transaction affiche un détail complet des frais — montant brut, frais NexaPay et montant net reçu." },
+    "card3": { "title": "Sans Engagement", "desc": "Pas de contrats, pas d'engagements. Commencez à traiter des paiements dès aujourd'hui et évoluez à votre rythme." }
+  },
+  "calc": {
+    "tag": "Calculateur de Frais",
+    "title": "Voyez exactement ce que vous payez",
+    "subtitle": "Entrez un montant de transaction pour voir le détail des frais.",
+    "label": "Montant de la transaction (XAF)",
+    "merchantAmount": "Montant Marchand",
+    "nexapayFee": "Frais NexaPay",
+    "customerPays": "Le Client Paie",
+    "note": "Tous les montants en XAF · Frais = max(1,5% du montant marchand, 50 XAF)"
+  },
+  "channels": {
+    "tag": "Canaux Supportés",
+    "title": "Même taux sur tous les canaux",
+    "subtitle": "1,5% s'applique à tous les modes de paiement — pas de supplément pour les paiements internationaux.",
+    "soon": "BIENTÔT DISPONIBLE"
+  },
+  "faq": {
+    "tag": "FAQ",
+    "title": "Questions fréquentes",
+    "subtitle": "Tout ce que vous devez savoir sur la tarification NexaPay.",
+    "items": [
+      { "q": "Quand suis-je facturé ?", "a": "Uniquement lorsqu'une transaction est complétée avec succès. Les transactions échouées ou en attente ne sont jamais facturées." },
+      { "q": "Y a-t-il un montant minimum de transaction ?", "a": "Les frais minimum NexaPay par transaction sont de 50 XAF. Cela s'applique aux très petites transactions où 1,5% serait inférieur à 50 XAF." },
+      { "q": "Y a-t-il des frais d'installation ou mensuels ?", "a": "Non. NexaPay est entièrement gratuit à configurer et il n'y a pas de frais mensuels. Vous ne payez que lorsque vous gagnez." },
+      { "q": "Comment les frais sont-ils calculés ?", "a": "NexaPay facture 1,5% du montant de la transaction. Les frais s'ajoutent au montant marchand — le client paie le montant brut et vous recevez le net." },
+      { "q": "Y a-t-il une remise sur volume ?", "a": "Oui ! Les marchands traitant des volumes élevés peuvent nous contacter pour négocier des tarifs personnalisés." }
+    ]
+  },
+  "cta": {
+    "title1": "Prêt à commencer à",
+    "title2": "accepter des paiements ?",
+    "desc": "Configurez votre compte en quelques minutes. Pas de paperasse, pas d'attente.",
+    "primary": "Commencer gratuitement →",
+    "secondary": "Parler aux ventes"
+  }
+},
+"developerSidebar": {
+  "portal": "Portail Développeur",
+  "links": {
+    "overview": "Vue d'ensemble",
+    "apiKeys": "Clés API",
+    "documentation": "Documentation",
+    "codeSnippets": "Extraits de Code",
+    "webhooks": "Webhooks",
+    "dashboard": "Tableau de Bord"
+  },
+  "signedInAs": "Connecté en tant que",
+  "backToHome": "Retour à l'accueil"
+},
+"developerOverview": {
+  "title": "Bienvenue,",
+  "subtitle": "Voici votre portail développeur NexaPay. Gérez vos clés API, lisez la documentation et intégrez les paiements dans votre application.",
+  "quickStart": {
+    "title": "Démarrage Rapide",
+    "desc": "Lancez-vous avec NexaPay en quelques minutes. Obtenez votre clé API et suivez le guide d'intégration.",
+    "getKey": "Obtenir une clé API",
+    "readDocs": "Lire la documentation"
+  },
+  "cards": {
+    "apiKeys": { "title": "Clés API", "desc": "Consultez et gérez vos clés API pour authentifier les requêtes vers l'API NexaPay.", "cta": "Gérer les clés" },
+    "docs": { "title": "Documentation", "desc": "Référence complète de tous les endpoints, paramètres et réponses de l'API NexaPay.", "cta": "Lire la doc" },
+    "snippets": { "title": "Extraits de Code", "desc": "Exemples de code prêts à l'emploi en JavaScript et TypeScript pour intégrer NexaPay rapidement.", "cta": "Voir les extraits" },
+    "webhooks": { "title": "Webhooks", "desc": "Soyez notifié en temps réel lorsque les paiements réussissent ou échouent dans votre application.", "cta": "Configurer les webhooks" }
+  }
+},
+"apiKeys": {
+  "title": "Clés API",
+  "subtitle": "Utilisez vos clés API pour authentifier les requêtes vers l'API NexaPay. Utilisez la clé de test pour le développement et la clé live pour la production.",
+  "signedInAs": "Connecté en tant que",
+  "testKey": {
+    "title": "Clé API de Test",
+    "desc": "Pour le développement et les tests — aucune approbation requise",
+    "badge": "Sandbox",
+    "notice": "Les transactions de test sont marquées comme TEST et traitées via le sandbox. Aucun argent réel ne circule.",
+    "notFound": "Aucune clé de test trouvée.",
+    "copied": "Clé API de test copiée !"
+  },
+  "liveKey": {
+    "title": "Clé API Live",
+    "desc": "Pour la production — nécessite une entreprise approuvée",
+    "badgeActive": "Active",
+    "badgePending": "Approbation requise",
+    "lockNotice": "Votre clé live est prête mais ne fonctionnera qu'après l'approbation de votre entreprise par notre équipe.",
+    "notFound": "Aucune clé live trouvée.",
+    "copied": "Clé API live copiée !"
+  },
+  "regenerate": {
+    "title": "Régénérer la clé live",
+    "desc": "Si votre clé live est compromise, régénérez-la immédiatement. Votre ancienne clé cessera de fonctionner immédiatement.",
+    "btn": "Régénérer la clé live",
+    "loading": "Régénération...",
+    "confirm": "Êtes-vous sûr ? Votre ancienne clé API live cessera de fonctionner immédiatement.",
+    "success": "Clé API live régénérée !",
+    "error": "Échec de la régénération de la clé.",
+    "errorNetwork": "Quelque chose s'est mal passé. Veuillez réessayer."
+  }
+},
+"docs": {
+  "badge": "Référence API v1.0",
+  "title": "Documentation API",
+  "subtitle": "Référence complète pour intégrer NexaPay dans votre application. Supporte Mobile Money, PayPal et plus.",
+  "onThisPage": "Sur cette page",
+  "nav": {
+    "prerequisites": "Prérequis",
+    "baseUrl": "URL de base",
+    "authentication": "Authentification",
+    "fees": "Structure des frais",
+    "initialize": "Initialiser un paiement",
+    "verify": "Vérifier un paiement",
+    "paypal": "Paiement PayPal",
+    "webhooks": "Webhooks",
+    "errors": "Codes d'erreur"
+  },
+  "table": {
+    "field": "Champ",
+    "type": "Type",
+    "required": "Requis",
+    "description": "Description",
+    "yes": "Oui",
+    "no": "Non",
+    "code": "Code",
+    "meaning": "Signification"
+  },
+  "prerequisites": {
+    "title": "Prérequis",
+    "intro": "Avant d'utiliser l'API NexaPay :",
+    "steps": [
+      "Créez un compte NexaPay sur /sign-up",
+      "Enregistrez votre entreprise sur /register-business",
+      "Attendez l'approbation de l'entreprise (24-48 heures)",
+      "Copiez votre clé API depuis la section Clés API"
+    ]
+  },
+  "baseUrl": { "title": "URL de base" },
+  "authentication": {
+    "title": "Authentification",
+    "desc": "Toutes les requêtes API doivent inclure votre clé API dans l'en-tête X-API-Key. Votre compte marchand doit être approuvé pour que la clé fonctionne.",
+    "warning": "N'exposez jamais votre clé API dans le code frontend. Appelez toujours NexaPay depuis votre serveur backend."
+  },
+  "fees": {
+    "title": "Structure des frais",
+    "desc": "NexaPay facture 1,5% par transaction réussie (minimum 50 XAF). Les frais s'ajoutent au montant du marchand — votre client paie le montant brut et vous recevez le montant net."
+  },
+  "initialize": {
+    "title": "Initialiser un paiement Mobile Money",
+    "desc": "Crée un nouveau paiement Mobile Money et retourne une authorization_url pour rediriger votre client afin de compléter le paiement.",
+    "requestBody": "Corps de la requête",
+    "successResponse": "Réponse de succès",
+    "fields": [
+      { "field": "amount", "type": "number", "req": "Oui", "desc": "Montant marchand en XAF — frais NexaPay ajoutés automatiquement" },
+      { "field": "currency", "type": "string", "req": "Non", "desc": "Code de devise — XAF par défaut" },
+      { "field": "name", "type": "string", "req": "Oui", "desc": "Nom complet du client" },
+      { "field": "phone", "type": "string", "req": "Oui", "desc": "Numéro de téléphone du client" },
+      { "field": "email", "type": "string", "req": "Non", "desc": "Adresse email du client" },
+      { "field": "channel", "type": "string", "req": "Oui", "desc": "Orange Money ou MTN Mobile Money" }
+    ]
+  },
+  "verify": {
+    "title": "Vérifier un paiement",
+    "desc": "Vérifie le statut d'un paiement. Appelé automatiquement lorsque le client est redirigé après le paiement. Met à jour le statut de la transaction dans votre tableau de bord.",
+    "queryParams": "Paramètres de requête",
+    "successResponse": "Réponse de succès",
+    "fields": [
+      { "field": "reference", "type": "string", "req": "Oui", "desc": "La référence de transaction retournée à l'initialisation" }
+    ]
+  },
+  "paypal": {
+    "title": "Initialiser un paiement PayPal",
+    "desc": "Crée une commande PayPal et retourne un identifiant de commande. Utilisez le SDK JS PayPal pour compléter le paiement sur le frontend.",
+    "requestBody": "Corps de la requête",
+    "successResponse": "Réponse de succès",
+    "captureDesc": "Capture une commande PayPal après approbation par le client.",
+    "fields": [
+      { "field": "amount", "type": "string", "req": "Oui", "desc": "Montant en chaîne décimale ex. '10.00'" },
+      { "field": "currency", "type": "string", "req": "Non", "desc": "Code de devise — USD par défaut" },
+      { "field": "description", "type": "string", "req": "Non", "desc": "Description du paiement" }
+    ],
+    "captureFields": [
+      { "field": "orderID", "type": "string", "req": "Oui", "desc": "L'identifiant de commande PayPal de create-order" }
+    ]
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "desc": "NexaPay envoie une requête POST à votre URL webhook après chaque événement de paiement. Configurez votre URL dans la section Webhooks.",
+    "events": "Événements",
+    "payload": "Payload",
+    "verifyTitle": "Vérification de la signature",
+    "verifyDesc": "Chaque requête webhook inclut un en-tête X-NexaPay-Signature. Vérifiez-le avec votre secret webhook pour confirmer que la requête provient de NexaPay."
+  },
+  "errors": {
+    "title": "Codes d'erreur",
+    "rows": [
+      { "code": "200", "meaning": "Succès" },
+      { "code": "400", "meaning": "Mauvaise requête — paramètres manquants ou invalides" },
+      { "code": "401", "meaning": "Non autorisé — clé API invalide, manquante ou non approuvée" },
+      { "code": "403", "meaning": "Interdit — permissions insuffisantes" },
+      { "code": "404", "meaning": "Non trouvé — la référence de transaction n'existe pas" },
+      { "code": "500", "meaning": "Erreur interne du serveur" },
+      { "code": "502", "meaning": "Impossible de joindre le fournisseur de paiement" }
+    ]
+  }
+}
+}
+ 
