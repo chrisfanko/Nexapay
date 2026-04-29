@@ -357,110 +357,79 @@
     "error": "Failed to regenerate key.",
     "errorNetwork": "Something went wrong. Please try again."
   }
+  },
+  "webhooksPage": {
+  "title": "Webhooks",
+  "subtitle": "Get notified in real-time when payments are completed or failed.",
+  "endpoint": {
+    "title": "Webhook Endpoint",
+    "desc": "NexaPay will send a POST request to this URL after every payment event.",
+    "label": "Webhook URL",
+    "placeholder": "https://yourapp.com/webhooks/nexapay",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "save": "Save Endpoint",
+    "errorFallback": "Failed to save"
+  },
+  "secret": {
+    "title": "Webhook Secret",
+    "desc": "Use this secret to verify that webhook requests are coming from NexaPay. Check the X-NexaPay-Signature header on incoming requests.",
+    "hide": "Hide",
+    "reveal": "Reveal",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "payload": {
+    "title": "Payload Example",
+    "desc": "This is what NexaPay sends to your endpoint on a successful payment."
+  },
+  "logs": {
+    "title": "Delivery Logs",
+    "refresh": "Refresh",
+    "empty": "No webhook deliveries yet.",
+    "emptyHint": "Logs will appear here after your first payment."
+  }
 },
-"docs": {
-  "badge": "API Reference v1.0",
-  "title": "API Documentation",
-  "subtitle": "Complete reference for integrating NexaPay into your application. Supports Mobile Money, PayPal and more.",
-  "onThisPage": "On this page",
-  "nav": {
-    "prerequisites": "Prerequisites",
-    "baseUrl": "Base URL",
-    "authentication": "Authentication",
-    "fees": "Fee Structure",
-    "initialize": "Initialize Payment",
-    "verify": "Verify Payment",
-    "paypal": "PayPal Payment",
-    "webhooks": "Webhooks",
-    "errors": "Error Codes"
+"codeSnippets": {
+  "badge": "Ready-to-use Examples",
+  "title": "Code Snippets",
+  "subtitle": "Copy-paste examples to integrate NexaPay into your app. Replace npk_live_your_api_key_here with your actual API key from the API Keys section.",
+  "allSnippets": "All Snippets",
+  "copied": "Copied!",
+  "copy": "Copy",
+  "codeCopied": "Code copied!",
+  "snippets": [
+    { "label": "Initialize Mobile Money Payment", "desc": "Initialize an MTN or Orange Money payment from your backend." },
+    { "label": "Verify Payment After Redirect", "desc": "Called on your success page when the customer returns after payment." },
+    { "label": "Initialize PayPal Payment", "desc": "Create a PayPal order and capture it using the PayPal JS SDK." },
+    { "label": "Next.js API Route Integration", "desc": "Proxy NexaPay calls from your Next.js backend to keep your API key secure." },
+    { "label": "Verify Webhook Signature", "desc": "Verify that incoming webhook requests are genuinely from NexaPay." },
+    { "label": "Flutter Integration", "desc": "Integrate NexaPay in your Flutter mobile app." }
+  ]
+},
+"auth": {
+  "backHome": "Back to Home",
+  "signIn": {
+    "title": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "continue": "Continue",
+    "noAccount": "Create new account",
+    "signUp": "Sign Up",
+    "success": "Login successful",
+    "invalidCredentials": "Invalid Credentials",
+    "error": "Something went wrong"
   },
-  "table": {
-    "field": "Field",
-    "type": "Type",
-    "required": "Required",
-    "description": "Description",
-    "yes": "Yes",
-    "no": "No",
-    "code": "Code",
-    "meaning": "Meaning"
-  },
-  "prerequisites": {
-    "title": "Prerequisites",
-    "intro": "Before using the NexaPay API:",
-    "steps": [
-      "Create a NexaPay account at /sign-up",
-      "Register your business at /register-business",
-      "Wait for business approval (24-48 hours)",
-      "Copy your API key from the API Keys section"
-    ]
-  },
-  "baseUrl": { "title": "Base URL" },
-  "authentication": {
-    "title": "Authentication",
-    "desc": "All API requests must include your API key in the X-API-Key header. Your merchant account must be approved for the key to work.",
-    "warning": "Never expose your API key in frontend code. Always call NexaPay from your backend server."
-  },
-  "fees": {
-    "title": "Fee Structure",
-    "desc": "NexaPay charges 1.5% per successful transaction (minimum 50 XAF). The fee is added on top of the merchant amount — your customer pays the gross amount and you receive the net."
-  },
-  "initialize": {
-    "title": "Initialize a Mobile Money Payment",
-    "desc": "Creates a new Mobile Money payment and returns an authorization_url to redirect your customer to complete payment.",
-    "requestBody": "Request Body",
-    "successResponse": "Success Response",
-    "fields": [
-      { "field": "amount", "type": "number", "req": "Yes", "desc": "Merchant amount in XAF — NexaPay fee added automatically" },
-      { "field": "currency", "type": "string", "req": "No", "desc": "Currency code — defaults to XAF" },
-      { "field": "name", "type": "string", "req": "Yes", "desc": "Customer full name" },
-      { "field": "phone", "type": "string", "req": "Yes", "desc": "Customer phone number" },
-      { "field": "email", "type": "string", "req": "No", "desc": "Customer email address" },
-      { "field": "channel", "type": "string", "req": "Yes", "desc": "Orange Money or MTN Mobile Money" }
-    ]
-  },
-  "verify": {
-    "title": "Verify a Payment",
-    "desc": "Verifies the status of a payment. Called automatically when the customer is redirected back after payment. Updates the transaction status in your dashboard.",
-    "queryParams": "Query Parameters",
-    "successResponse": "Success Response",
-    "fields": [
-      { "field": "reference", "type": "string", "req": "Yes", "desc": "The transaction reference returned at initialization" }
-    ]
-  },
-  "paypal": {
-    "title": "Initialize a PayPal Payment",
-    "desc": "Creates a PayPal order and returns an order ID. Use the PayPal JS SDK to complete the payment on the frontend.",
-    "requestBody": "Request Body",
-    "successResponse": "Success Response",
-    "captureDesc": "Captures a PayPal order after the customer approves it.",
-    "fields": [
-      { "field": "amount", "type": "string", "req": "Yes", "desc": "Amount as decimal string e.g. '10.00'" },
-      { "field": "currency", "type": "string", "req": "No", "desc": "Currency code — defaults to USD" },
-      { "field": "description", "type": "string", "req": "No", "desc": "Payment description" }
-    ],
-    "captureFields": [
-      { "field": "orderID", "type": "string", "req": "Yes", "desc": "The PayPal order ID from create-order" }
-    ]
-  },
-  "webhooks": {
-    "title": "Webhooks",
-    "desc": "NexaPay sends a POST request to your webhook URL after every payment event. Configure your URL in the Webhooks section.",
-    "events": "Events",
-    "payload": "Payload",
-    "verifyTitle": "Verifying the Signature",
-    "verifyDesc": "Every webhook request includes an X-NexaPay-Signature header. Verify it with your webhook secret to confirm the request came from NexaPay."
-  },
-  "errors": {
-    "title": "Error Codes",
-    "rows": [
-      { "code": "200", "meaning": "Success" },
-      { "code": "400", "meaning": "Bad request — missing or invalid parameters" },
-      { "code": "401", "meaning": "Unauthorized — invalid, missing, or unapproved API key" },
-      { "code": "403", "meaning": "Forbidden — insufficient permissions" },
-      { "code": "404", "meaning": "Not found — transaction reference does not exist" },
-      { "code": "500", "meaning": "Internal server error" },
-      { "code": "502", "meaning": "Could not reach payment provider" }
-    ]
+  "signUp": {
+    "title": "Sign Up",
+    "desc": "Use email or service to create account",
+    "fullName": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "continue": "Continue",
+    "hasAccount": "Already have an account",
+    "signIn": "Sign In"
   }
 }
 }

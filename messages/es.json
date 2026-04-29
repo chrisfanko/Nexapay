@@ -462,5 +462,79 @@
       { "code": "502", "meaning": "No se pudo contactar al proveedor de pago" }
     ]
   }
+},
+"webhooksPage": {
+  "title": "Webhooks",
+  "subtitle": "Recibe notificaciones en tiempo real cuando los pagos se completen o fallen.",
+  "endpoint": {
+    "title": "Endpoint de Webhook",
+    "desc": "NexaPay enviará una solicitud POST a esta URL después de cada evento de pago.",
+    "label": "URL de Webhook",
+    "placeholder": "https://tuapp.com/webhooks/nexapay",
+    "saving": "Guardando...",
+    "saved": "¡Guardado!",
+    "save": "Guardar endpoint",
+    "errorFallback": "Error al guardar"
+  },
+  "secret": {
+    "title": "Secreto de Webhook",
+    "desc": "Usa este secreto para verificar que las solicitudes webhook provienen de NexaPay. Verifica el encabezado X-NexaPay-Signature en las solicitudes entrantes.",
+    "hide": "Ocultar",
+    "reveal": "Revelar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!"
+  },
+  "payload": {
+    "title": "Ejemplo de Payload",
+    "desc": "Esto es lo que NexaPay envía a tu endpoint en un pago exitoso."
+  },
+  "logs": {
+    "title": "Registros de entrega",
+    "refresh": "Actualizar",
+    "empty": "Aún no hay entregas de webhook.",
+    "emptyHint": "Los registros aparecerán aquí después de tu primer pago."
+  }
+},
+"codeSnippets": {
+  "badge": "Ejemplos listos para usar",
+  "title": "Fragmentos de Código",
+  "subtitle": "Ejemplos para copiar y pegar para integrar NexaPay en tu aplicación. Reemplaza npk_live_your_api_key_here con tu clave API real desde la sección Claves API.",
+  "allSnippets": "Todos los fragmentos",
+  "copied": "¡Copiado!",
+  "copy": "Copiar",
+  "codeCopied": "¡Código copiado!",
+  "snippets": [
+    { "label": "Inicializar pago Mobile Money", "desc": "Inicializa un pago MTN u Orange Money desde tu backend." },
+    { "label": "Verificar pago tras redirección", "desc": "Se llama en tu página de éxito cuando el cliente regresa después del pago." },
+    { "label": "Inicializar pago PayPal", "desc": "Crea una orden PayPal y captúrala usando el SDK JS de PayPal." },
+    { "label": "Integración ruta API Next.js", "desc": "Proxy de llamadas NexaPay desde tu backend Next.js para mantener segura tu clave API." },
+    { "label": "Verificar firma de Webhook", "desc": "Verifica que las solicitudes webhook entrantes provienen genuinamente de NexaPay." },
+    { "label": "Integración Flutter", "desc": "Integra NexaPay en tu aplicación móvil Flutter." }
+  ]
+},
+"auth": {
+  "backHome": "Volver al inicio",
+  "signIn": {
+    "title": "Iniciar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "continue": "Continuar",
+    "noAccount": "Crear nueva cuenta",
+    "signUp": "Registrarse",
+    "success": "Inicio de sesión exitoso",
+    "invalidCredentials": "Credenciales inválidas",
+    "error": "Algo salió mal"
+  },
+  "signUp": {
+    "title": "Registrarse",
+    "desc": "Usa un correo o servicio para crear una cuenta",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "continue": "Continuar",
+    "hasAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar sesión"
+  }
 }
 }

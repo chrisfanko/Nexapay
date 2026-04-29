@@ -10,9 +10,11 @@ import { FcGoogle } from 'react-icons/fc';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { TriangleAlert, Eye, EyeOff } from 'lucide-react';
+import { TriangleAlert, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const SignIn = () => {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [pending, setPending] = useState(false);
@@ -33,19 +35,17 @@ const SignIn = () => {
     if (res?.ok) {
       const session = await getSession();
       const role = session?.user?.role;
-
       if (role === "admin") {
         router.push("/admin");
       } else {
         router.push("/dashboard");
       }
-
-      toast.success("Login successful")
+      toast.success(t("signIn.success"))
     } else if (res?.status === 401) {
-      setError("Invalid Credentials")
+      setError(t("signIn.invalidCredentials"))
       setPending(false);
     } else {
-      setError("Something went wrong")
+      setError(t("signIn.error"))
       setPending(false);
     };
   }
@@ -59,85 +59,99 @@ const SignIn = () => {
   }
 
   return (
-    <div className='h-full flex items-center bg-blue-200 justify-center'>
-      <Card className='md:h-auto w-[80%] sm:p-8 p-4 sm:w-105'>
-        <CardHeader>
-          <CardTitle className='text-center'>Sign In</CardTitle>
-          <CardDescription className='text-sm text-center text-accent-foreground'></CardDescription>
-        </CardHeader>
+    <div className='min-h-screen flex flex-col bg-blue-200'>
+      {/* Back to Home button */}
+      <div className='p-4'>
+        <Link
+          href="/"
+          className='inline-flex items-center gap-2 text-sm font-medium text-blue-900 hover:text-blue-700 transition-colors'
+        >
+          <ArrowLeft className='w-4 h-4' />
+          {t("backHome")}
+        </Link>
+      </div>
 
-        {!!error && (
-          <div className='bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'>
-            <TriangleAlert />
-            <p>{error}</p>
-          </div>
-        )}
+      {/* Centered form */}
+      <div className='flex-1 flex items-center justify-center'>
+        <Card className='md:h-auto w-[80%] sm:p-8 p-4 sm:w-105'>
+          <CardHeader>
+            <CardTitle className='text-center'>{t("signIn.title")}</CardTitle>
+            <CardDescription className='text-sm text-center text-accent-foreground' />
+          </CardHeader>
 
-        <CardContent className='px-2 sm:px-6'>
-          <form onSubmit={handleSubmit} className='space-y-3'>
-            <Input
-              type='email'
-              disabled={pending}
-              placeholder='Email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          {!!error && (
+            <div className='bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'>
+              <TriangleAlert />
+              <p>{error}</p>
+            </div>
+          )}
 
-            <div className='relative'>
+          <CardContent className='px-2 sm:px-6'>
+            <form onSubmit={handleSubmit} className='space-y-3'>
               <Input
-                type={showPassword ? 'text' : 'password'}
+                type='email'
                 disabled={pending}
-                placeholder='Password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("signIn.email")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className='pr-10'
               />
-              <button
-                type='button'
-                onClick={() => setShowPassword(!showPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
-                tabIndex={-1}
+              <div className='relative'>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  disabled={pending}
+                  placeholder={t("signIn.password")}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className='pr-10'
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
+                </button>
+              </div>
+              <Button className='w-full' size="lg" disabled={pending}>
+                {t("signIn.continue")}
+              </Button>
+            </form>
+
+            <Separator />
+
+            <div className='flex my-2 justify-evenly mx-auto items-center'>
+              <Button
+                disabled={false}
+                onClick={(e) => handleProvider(e, "google")}
+                variant="outline"
+                size="lg"
+                className='bg-slate-300 hover:bg-slate-400 hover:scale-110'
               >
-                {showPassword ? <EyeOff className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
-              </button>
+                <FcGoogle className='size-8 left-2.5 top-2.5' />
+              </Button>
+              <Button
+                disabled={false}
+                onClick={(e) => handleProvider(e, "github")}
+                variant="outline"
+                size="lg"
+                className='bg-slate-300 hover:bg-slate-400 hover:scale-110'
+              >
+                <FaGithub className='size-8 left-2.5 top-2.5' />
+              </Button>
             </div>
 
-            <Button className='w-full' size="lg" disabled={pending}>
-              Continue
-            </Button>
-          </form>
-
-          <Separator />
-
-          <div className='flex my-2 justify-evenly mx-auto items-center'>
-            <Button
-              disabled={false}
-              onClick={(e) => handleProvider(e, "google")}
-              variant="outline"
-              size="lg"
-              className='bg-slate-300 hover:bg-slate-400 hover:scale-110'
-            >
-              <FcGoogle className='size-8 left-2.5 top-2.5' />
-            </Button>
-            <Button
-              disabled={false}
-              onClick={(e) => handleProvider(e, "github")}
-              variant="outline"
-              size="lg"
-              className='bg-slate-300 hover:bg-slate-400 hover:scale-110'
-            >
-              <FaGithub className='size-8 left-2.5 top-2.5' />
-            </Button>
-          </div>
-
-          <p>
-            Create new account
-            <Link href="sign-up" className='text-sky-700 ml-4 hover:underline cursor-pointer'>Sign Up</Link>
-          </p>
-        </CardContent>
-      </Card>
+            <p>
+              {t("signIn.noAccount")}
+              <Link href="sign-up" className='text-sky-700 ml-4 hover:underline cursor-pointer'>
+                {t("signIn.signUp")}
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

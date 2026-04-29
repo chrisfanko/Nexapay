@@ -3,13 +3,10 @@
 import { useState } from "react";
 import { Copy, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-const snippets = [
-  {
-    label: "Initialize Mobile Money Payment",
-    language: "JavaScript",
-    desc: "Initialize an MTN or Orange Money payment from your backend.",
-    code: `const res = await fetch("https://yourdomain.com/api/notchpay/initialize", {
+const codes = [
+  `const res = await fetch("https://yourdomain.com/api/notchpay/initialize", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -19,27 +16,20 @@ const snippets = [
     name: "John Doe",
     phone: "237600000000",
     email: "john@example.com",
-    amount: 10000,       // merchant amount in XAF
+    amount: 10000,
     currency: "XAF",
-    channel: "MTN Mobile Money", // or "Orange Money"
+    channel: "MTN Mobile Money",
   }),
 });
 
 const data = await res.json();
 
 if (data?.transaction?.reference) {
-  // Redirect customer to complete payment
   window.location.href = data.authorization_url;
 } else {
   console.error("Failed to initialize payment:", data.error);
 }`,
-  },
-  {
-    label: "Verify Payment After Redirect",
-    language: "JavaScript",
-    desc: "Called on your success page when the customer returns after payment.",
-    code: `// Get reference from URL: /payment/success?reference=trx_xxx
-const reference = new URLSearchParams(window.location.search).get("reference");
+  `const reference = new URLSearchParams(window.location.search).get("reference");
 
 const res = await fetch(
   \`https://yourdomain.com/api/notchpay/verify?reference=\${reference}\`
@@ -53,20 +43,14 @@ if (data?.transaction?.status === "complete") {
 } else {
   console.log("❌ Payment failed or pending.");
 }`,
-  },
-  {
-    label: "Initialize PayPal Payment",
-    language: "JavaScript",
-    desc: "Create a PayPal order and capture it using the PayPal JS SDK.",
-    code: `// Step 1: Create order on your backend
-const res = await fetch("https://yourdomain.com/api/paypal/create-order", {
+  `const res = await fetch("https://yourdomain.com/api/paypal/create-order", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
     "X-API-Key": "npk_live_your_api_key_here",
   },
   body: JSON.stringify({
-    amount: "10.00",    // in USD as decimal string
+    amount: "10.00",
     currency: "USD",
     description: "Order #1234",
   }),
@@ -74,7 +58,6 @@ const res = await fetch("https://yourdomain.com/api/paypal/create-order", {
 
 const { id: orderID } = await res.json();
 
-// Step 2: Capture order after PayPal approval
 const captureRes = await fetch("https://yourdomain.com/api/paypal/capture-order", {
   method: "POST",
   headers: {
@@ -86,12 +69,7 @@ const captureRes = await fetch("https://yourdomain.com/api/paypal/capture-order"
 
 const captureData = await captureRes.json();
 console.log("PayPal payment status:", captureData.status);`,
-  },
-  {
-    label: "Next.js API Route Integration",
-    language: "TypeScript",
-    desc: "Proxy NexaPay calls from your Next.js backend to keep your API key secure.",
-    code: `// app/api/pay/route.ts
+  `// app/api/pay/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -105,25 +83,14 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         "X-API-Key": process.env.NEXAPAY_API_KEY!,
       },
-      body: JSON.stringify({
-        name,
-        phone,
-        amount,
-        currency: "XAF",
-        channel,
-      }),
+      body: JSON.stringify({ name, phone, amount, currency: "XAF", channel }),
     }
   );
 
   const data = await res.json();
   return NextResponse.json(data);
 }`,
-  },
-  {
-    label: "Verify Webhook Signature",
-    language: "TypeScript",
-    desc: "Verify that incoming webhook requests are genuinely from NexaPay.",
-    code: `// app/api/webhooks/nexapay/route.ts
+  `// app/api/webhooks/nexapay/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -131,7 +98,6 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-nexapay-signature") || "";
   const body = await req.text();
 
-  // Verify signature
   const expected = "sha256=" + crypto
     .createHmac("sha256", process.env.NEXAPAY_WEBHOOK_SECRET!)
     .update(body)
@@ -146,22 +112,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  // Process the event
   const payload = JSON.parse(body);
 
   if (payload.event === "payment.complete") {
     console.log("Payment complete:", payload.reference);
-    // Update your database, send confirmation email, etc.
   }
 
   return NextResponse.json({ received: true });
 }`,
-  },
-  {
-    label: "Flutter Integration",
-    language: "Dart",
-    desc: "Integrate NexaPay in your Flutter mobile app.",
-    code: `import 'package:http/http.dart' as http;
+  `import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<String> initializePayment({
@@ -188,22 +147,24 @@ Future<String> initializePayment({
   final data = jsonDecode(response.body);
 
   if (response.statusCode == 200) {
-    // Open payment URL in WebView
     return data['authorization_url'];
   } else {
     throw Exception(data['error'] ?? 'Payment failed');
   }
 }`,
-  },
 ];
 
-function CodeBlock({ code, language }: { code: string; language: string }) {
+const languages = ["JavaScript", "JavaScript", "JavaScript", "TypeScript", "TypeScript", "Dart"];
+
+function CodeBlock({ code, language, copiedLabel, copyLabel, toastMsg }: {
+  code: string; language: string; copiedLabel: string; copyLabel: string; toastMsg: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
-    toast.success("Code copied!");
+    toast.success(toastMsg);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -218,26 +179,25 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
           </div>
           <span className="text-xs text-zinc-500 font-medium">{language}</span>
         </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition"
-        >
-          {copied
-            ? <CheckCheck className="w-3.5 h-3.5 text-green-400" />
-            : <Copy className="w-3.5 h-3.5" />
-          }
-          {copied ? "Copied!" : "Copy"}
+        <button onClick={handleCopy} className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition">
+          {copied ? <CheckCheck className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? copiedLabel : copyLabel}
         </button>
       </div>
-      <pre className="px-5 py-5 text-sm text-blue-200 overflow-x-auto font-mono leading-relaxed">
-        {code}
-      </pre>
+      <pre className="px-5 py-5 text-sm text-blue-200 overflow-x-auto font-mono leading-relaxed">{code}</pre>
     </div>
   );
 }
 
 export default function CodeSnippetsPage() {
+  const t = useTranslations("codeSnippets");
   const [active, setActive] = useState(0);
+
+  const snippets = (t.raw("snippets") as { label: string; desc: string }[]).map((s, i) => ({
+    ...s,
+    code: codes[i],
+    language: languages[i],
+  }));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -245,16 +205,17 @@ export default function CodeSnippetsPage() {
       <div className="mb-10 pb-8 border-b border-[#1E3A6E]">
         <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-          Ready-to-use Examples
+          {t("badge")}
         </div>
-        <h1 className="text-3xl font-black text-white mb-2">Code Snippets</h1>
+        <h1 className="text-3xl font-black text-white mb-2">{t("title")}</h1>
         <p className="text-zinc-400 text-sm leading-relaxed">
-          Copy-paste examples to integrate NexaPay into your app.
-          Replace{" "}
-          <code className="bg-blue-500/10 border border-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-xs">
-            npk_live_your_api_key_here
-          </code>{" "}
-          with your actual API key from the API Keys section.
+          {t("subtitle").split("npk_live_your_api_key_here").map((part, i) =>
+            i === 0 ? (
+              <span key={i}>{part}<code className="bg-blue-500/10 border border-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-xs">npk_live_your_api_key_here</code></span>
+            ) : (
+              <span key={i}>{part}</span>
+            )
+          )}
         </p>
       </div>
 
@@ -281,13 +242,19 @@ export default function CodeSnippetsPage() {
           <h2 className="text-lg font-bold text-white mb-1">{snippets[active].label}</h2>
           <p className="text-sm text-zinc-400">{snippets[active].desc}</p>
         </div>
-        <CodeBlock code={snippets[active].code} language={snippets[active].language} />
+        <CodeBlock
+          code={snippets[active].code}
+          language={snippets[active].language}
+          copyLabel={t("copy")}
+          copiedLabel={t("copied")}
+          toastMsg={t("codeCopied")}
+        />
       </div>
 
-      {/* All snippets below */}
+      {/* All snippets */}
       <div className="mt-12 space-y-10">
         <div className="border-t border-[#1E3A6E] pt-8">
-          <h2 className="text-lg font-bold text-white mb-6">All Snippets</h2>
+          <h2 className="text-lg font-bold text-white mb-6">{t("allSnippets")}</h2>
           {snippets.map((snippet, i) => (
             <div key={i} className="mb-8">
               <div className="flex items-start justify-between mb-3">
@@ -299,7 +266,13 @@ export default function CodeSnippetsPage() {
                   {snippet.language}
                 </span>
               </div>
-              <CodeBlock code={snippet.code} language={snippet.language} />
+              <CodeBlock
+                code={snippet.code}
+                language={snippet.language}
+                copyLabel={t("copy")}
+                copiedLabel={t("copied")}
+                toastMsg={t("codeCopied")}
+              />
             </div>
           ))}
         </div>
