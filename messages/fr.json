@@ -537,6 +537,189 @@
     "hasAccount": "Vous avez déjà un compte",
     "signIn": "Se connecter"
   }
+},
+"dashboardSidebar": {
+  "merchantDashboard": "Tableau de Bord Marchand",
+  "links": {
+    "overview": "Vue d'ensemble",
+    "transactions": "Transactions",
+    "developerPortal": "Portail Développeur"
+  },
+  "signedInAs": "Connecté en tant que",
+  "backToHome": "Retour à l'accueil"
+},
+"dashboardOverview": {
+  "welcome": "Bienvenue,",
+  "subtitle": "Voici un aperçu de votre activité de paiement sur NexaPay.",
+  "modeBanner": "Vous consultez",
+  "testTransactions": "les transactions de test",
+  "noRealMoney": "— aucun argent réel impliqué.",
+  "test": "Test",
+  "live": "Live",
+  "stats": {
+    "totalVolume": "Volume Total",
+    "totalTransactions": "Total des Transactions",
+    "successful": "Réussies",
+    "failed": "Échouées",
+    "pending": "En Attente",
+    "successRate": "Taux de Succès"
+  },
+  "recentTransactions": "Transactions Récentes",
+  "viewAll": "Tout voir →",
+  "table": {
+    "reference": "Référence",
+    "customer": "Client",
+    "channel": "Canal",
+    "amount": "Montant",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "noTransactions": "Aucune transaction {mode} pour l'instant"
+},
+"dashboardTransactions": {
+  "title": "Transactions",
+  "totalLabel": "transactions {mode} au total",
+  "test": "Test",
+  "live": "Live",
+  "testBanner": "Affichage des",
+  "testBannerBold": "transactions de test",
+  "testBannerSuffix": "— aucun argent réel impliqué.",
+  "searchPlaceholder": "Rechercher par référence...",
+  "search": "Rechercher",
+  "allStatus": "Tous les statuts",
+  "complete": "Complétée",
+  "failed": "Échouée",
+  "pending": "En attente",
+  "allChannels": "Tous les canaux",
+  "table": {
+    "reference": "Référence",
+    "customer": "Client",
+    "channel": "Canal",
+    "amount": "Montant",
+    "fee": "Frais NexaPay",
+    "net": "Net",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "noTransactions": "Aucune transaction {mode} trouvée",
+  "page": "Page",
+  "of": "sur",
+  "previous": "Précédent",
+  "next": "Suivant"
+},
+"adminSidebar": {
+  "title": "Panneau Admin",
+  "links": {
+    "overview": "Vue d'ensemble",
+    "transactions": "Transactions",
+    "merchants": "Marchands",
+    "businesses": "Entreprises",
+    "messages": "Messages"
+  },
+  "signedInAs": "Connecté en tant que",
+  "backToHome": "Retour à l'accueil"
+},
+"adminOverview": {
+  "title": "Vue d'ensemble Admin",
+  "subtitle": "Statistiques globales pour tous les marchands et transactions.",
+  "stats": {
+    "totalVolume": "Volume Total",
+    "totalFees": "Frais NexaPay Collectés",
+    "totalTransactions": "Total des Transactions",
+    "totalMerchants": "Total des Marchands",
+    "successful": "Réussies",
+    "failed": "Échouées",
+    "pending": "En Attente",
+    "successRate": "Taux de Succès"
+  },
+  "quickLinks": {
+    "transactions": "Voir Toutes les Transactions",
+    "transactionsDesc": "Filtrer, rechercher et examiner chaque transaction",
+    "merchants": "Voir Tous les Marchands",
+    "merchantsDesc": "Voir tous les utilisateurs inscrits sur NexaPay"
+  }
+},
+"adminBusinesses": {
+  "title": "Demandes d'Entreprise",
+  "subtitle": "Examiner et approuver les demandes des marchands",
+  "filters": {
+    "all": "Tous",
+    "pending": "En attente",
+    "approved": "Approuvées",
+    "rejected": "Rejetées"
+  },
+  "noApplications": "Aucune demande trouvée",
+  "fields": {
+    "type": "Type",
+    "country": "Pays",
+    "phone": "Téléphone",
+    "applied": "Soumis le"
+  },
+  "rejectionReason": "Motif de rejet",
+  "approve": "Approuver",
+  "reject": "Rejeter",
+  "rejectModal": {
+    "title": "Rejeter la demande",
+    "subtitle": "Veuillez fournir un motif de rejet. Il sera communiqué au marchand.",
+    "placeholder": "ex. Informations incomplètes, type d'entreprise non supporté...",
+    "cancel": "Annuler",
+    "confirm": "Confirmer le rejet"
+  }
+},
+"adminMessages": {
+  "title": "Messages",
+  "subtitle": "Soumissions du formulaire de contact de votre site",
+  "unread": "non lu(s)",
+  "filters": {
+    "all": "Tous",
+    "unread": "Non lus",
+    "read": "Lus"
+  },
+  "noMessages": "Aucun message trouvé",
+  "selectMessage": "Sélectionnez un message pour le lire",
+  "from": "De",
+  "markUnread": "Marquer comme non lu",
+  "markRead": "Marquer comme lu",
+  "reply": "Répondre →"
+},
+"adminMerchants": {
+  "title": "Marchands",
+  "subtitle": "Tous les utilisateurs inscrits sur NexaPay —",
+  "total": "au total",
+  "noMerchants": "Aucun marchand pour l'instant",
+  "noKey": "Pas encore de clé",
+  "table": {
+    "name": "Nom",
+    "email": "Email",
+    "apiKey": "Clé API",
+    "joined": "Inscrit le"
+  }
+},
+"adminTransactions": {
+  "title": "Toutes les Transactions",
+  "subtitle": "transactions au total sur tous les marchands",
+  "searchPlaceholder": "Rechercher par référence...",
+  "search": "Rechercher",
+  "allStatus": "Tous les statuts",
+  "complete": "Complétée",
+  "failed": "Échouée",
+  "pending": "En attente",
+  "allChannels": "Tous les canaux",
+  "noTransactions": "Aucune transaction trouvée",
+  "table": {
+    "reference": "Référence",
+    "customer": "Client",
+    "channel": "Canal",
+    "gross": "Brut",
+    "fee": "Frais NexaPay",
+    "net": "Net",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "page": "Page",
+  "of": "sur",
+  "previous": "Précédent",
+  "next": "Suivant"
 }
 }
  

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Search, FlaskConical, Zap } from "lucide-react";
 
 interface Transaction {
@@ -31,6 +32,7 @@ const statusEmoji = {
 };
 
 export default function DashboardTransactionsPage() {
+  const t = useTranslations("dashboardTransactions");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -80,8 +82,10 @@ export default function DashboardTransactionsPage() {
     <div className="max-w-6xl mx-auto">
       <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900">Transactions</h1>
-          <p className="text-gray-500 mt-1">{total} total {mode} transactions</p>
+          <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
+          <p className="text-gray-500 mt-1">
+            {total} {t("totalLabel", { mode })}
+          </p>
         </div>
 
         {/* TEST / LIVE toggle */}
@@ -95,7 +99,7 @@ export default function DashboardTransactionsPage() {
             }`}
           >
             <FlaskConical className="w-4 h-4" />
-            Test
+            {t("test")}
           </button>
           <button
             onClick={() => handleModeChange("live")}
@@ -106,7 +110,7 @@ export default function DashboardTransactionsPage() {
             }`}
           >
             <Zap className="w-4 h-4" />
-            Live
+            {t("live")}
           </button>
         </div>
       </div>
@@ -115,7 +119,7 @@ export default function DashboardTransactionsPage() {
       {mode === "test" && (
         <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700">
           <FlaskConical className="w-4 h-4 shrink-0" />
-          Viewing <strong>test transactions</strong> — no real money involved.
+          {t("testBanner")} <strong className="mx-1">{t("testBannerBold")}</strong> {t("testBannerSuffix")}
         </div>
       )}
 
@@ -126,36 +130,36 @@ export default function DashboardTransactionsPage() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by reference..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition">
-            Search
+            {t("search")}
           </button>
         </form>
 
         <select
-          title="Filter by status"
+          title={t("allStatus")}
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); setLoading(true); }}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">All Status</option>
-          <option value="complete">Complete</option>
-          <option value="failed">Failed</option>
-          <option value="pending">Pending</option>
+          <option value="all">{t("allStatus")}</option>
+          <option value="complete">{t("complete")}</option>
+          <option value="failed">{t("failed")}</option>
+          <option value="pending">{t("pending")}</option>
         </select>
 
         <select
-          title="Filter by channel"
+          title={t("allChannels")}
           value={channel}
           onChange={(e) => { setChannel(e.target.value); setPage(1); setLoading(true); }}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="all">All Channels</option>
+          <option value="all">{t("allChannels")}</option>
           <option value="Orange Money">Orange Money</option>
           <option value="MTN Mobile Money">MTN Mobile Money</option>
           <option value="PayPal">PayPal</option>
@@ -168,14 +172,14 @@ export default function DashboardTransactionsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Reference</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Customer</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Channel</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Amount</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">NexaPay Fee</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Net</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">Date</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.reference")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.customer")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.channel")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.amount")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.fee")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.net")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.status")}</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -192,7 +196,7 @@ export default function DashboardTransactionsPage() {
               ) : transactions.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-gray-400">
-                    No {mode} transactions found
+                    {t("noTransactions", { mode })}
                   </td>
                 </tr>
               ) : (
@@ -236,21 +240,23 @@ export default function DashboardTransactionsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">Page {page} of {totalPages}</p>
+          <p className="text-sm text-gray-500">
+            {t("page")} {page} {t("of")} {totalPages}
+          </p>
           <div className="flex gap-2">
             <button
               onClick={() => { setPage((p) => Math.max(1, p - 1)); setLoading(true); }}
               disabled={page === 1}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition"
             >
-              Previous
+              {t("previous")}
             </button>
             <button
               onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setLoading(true); }}
               disabled={page === totalPages}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition"
             >
-              Next
+              {t("next")}
             </button>
           </div>
         </div>

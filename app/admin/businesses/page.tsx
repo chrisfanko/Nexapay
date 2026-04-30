@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle, XCircle, Clock, Building2 } from "lucide-react";
 
 interface Business {
@@ -33,6 +34,7 @@ const statusIcons = {
 };
 
 export default function AdminBusinessesPage() {
+  const t = useTranslations("adminBusinesses");
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -43,22 +45,17 @@ export default function AdminBusinessesPage() {
   useEffect(() => {
     fetch(`/api/admin/businesses?status=${filter}`)
       .then((res) => res.json())
-      .then((data) => {
-        setBusinesses(data.businesses || []);
-        setLoading(false);
-      })
+      .then((data) => { setBusinesses(data.businesses || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [filter]);
 
   const handleAction = async (userId: string, action: "approve" | "reject", reason?: string) => {
     setActionLoading(userId);
-
     const res = await fetch("/api/admin/businesses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, action, rejectionReason: reason }),
     });
-
     if (res.ok) {
       setBusinesses((prev) =>
         prev.map((b) =>
@@ -68,37 +65,34 @@ export default function AdminBusinessesPage() {
         )
       );
     }
-
     setActionLoading(null);
     setRejectModal(null);
     setRejectReason("");
   };
 
+  const filterKeys = ["all", "pending", "approved", "rejected"] as const;
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-zinc-900">Business Applications</h1>
-        <p className="text-gray-500 mt-2">Review and approve merchant business applications</p>
+        <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
+        <p className="text-gray-500 mt-2">{t("subtitle")}</p>
       </div>
 
-      {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
-        {["all", "pending", "approved", "rejected"].map((s) => (
+        {filterKeys.map((s) => (
           <button
             key={s}
             onClick={() => { setFilter(s); setLoading(true); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
-              filter === s
-                ? "bg-blue-500 text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              filter === s ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            {s}
+            {t(`filters.${s}`)}
           </button>
         ))}
       </div>
 
-      {/* Cards */}
       {loading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
@@ -108,42 +102,37 @@ export default function AdminBusinessesPage() {
       ) : businesses.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-400">No applications found</p>
+          <p className="text-gray-400">{t("noApplications")}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {businesses.map((b) => (
             <div key={b._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                {/* Business info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-lg font-bold text-zinc-900">
-                      {b.business?.companyName}
-                    </h2>
+                    <h2 className="text-lg font-bold text-zinc-900">{b.business?.companyName}</h2>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[b.merchantStatus]}`}>
                       {statusIcons[b.merchantStatus]}
                       {b.merchantStatus}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 mb-3">
-                    {b.name} · {b.email}
-                  </p>
+                  <p className="text-sm text-gray-500 mb-3">{b.name} · {b.email}</p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-gray-400">Type</p>
+                      <p className="text-xs text-gray-400">{t("fields.type")}</p>
                       <p className="font-medium text-zinc-900">{b.business?.businessType}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400">Country</p>
+                      <p className="text-xs text-gray-400">{t("fields.country")}</p>
                       <p className="font-medium text-zinc-900">{b.business?.country}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400">Phone</p>
+                      <p className="text-xs text-gray-400">{t("fields.phone")}</p>
                       <p className="font-medium text-zinc-900">{b.business?.phone}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400">Applied</p>
+                      <p className="text-xs text-gray-400">{t("fields.applied")}</p>
                       <p className="font-medium text-zinc-900">
                         {new Date(b.business?.registeredAt).toLocaleDateString()}
                       </p>
@@ -160,12 +149,11 @@ export default function AdminBusinessesPage() {
                   )}
                   {b.rejectionReason && (
                     <div className="mt-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm text-red-600">
-                      Rejection reason: {b.rejectionReason}
+                      {t("rejectionReason")}: {b.rejectionReason}
                     </div>
                   )}
                 </div>
 
-                {/* Actions */}
                 {b.merchantStatus === "pending" && (
                   <div className="flex gap-2 shrink-0">
                     <button
@@ -174,7 +162,7 @@ export default function AdminBusinessesPage() {
                       className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      Approve
+                      {t("approve")}
                     </button>
                     <button
                       onClick={() => setRejectModal(b._id)}
@@ -182,7 +170,7 @@ export default function AdminBusinessesPage() {
                       className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
                     >
                       <XCircle className="w-4 h-4" />
-                      Reject
+                      {t("reject")}
                     </button>
                   </div>
                 )}
@@ -192,18 +180,15 @@ export default function AdminBusinessesPage() {
         </div>
       )}
 
-      {/* Reject Modal */}
       {rejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-lg font-bold text-zinc-900 mb-2">Reject Application</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Please provide a reason for rejection. This will be shown to the merchant.
-            </p>
+            <h3 className="text-lg font-bold text-zinc-900 mb-2">{t("rejectModal.title")}</h3>
+            <p className="text-sm text-gray-500 mb-4">{t("rejectModal.subtitle")}</p>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="e.g. Incomplete information, business type not supported..."
+              placeholder={t("rejectModal.placeholder")}
               rows={3}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none mb-4"
             />
@@ -212,14 +197,14 @@ export default function AdminBusinessesPage() {
                 onClick={() => { setRejectModal(null); setRejectReason(""); }}
                 className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
               >
-                Cancel
+                {t("rejectModal.cancel")}
               </button>
               <button
                 onClick={() => handleAction(rejectModal, "reject", rejectReason)}
                 disabled={!rejectReason.trim()}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition"
               >
-                Confirm Reject
+                {t("rejectModal.confirm")}
               </button>
             </div>
           </div>

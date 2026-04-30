@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Mail, MailOpen, } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Message {
   _id: string;
@@ -16,6 +17,7 @@ interface Message {
 const filterTabs = ["all", "unread", "read"];
 
 export default function AdminMessagesPage() {
+  const t = useTranslations("adminMessages")
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -61,14 +63,14 @@ export default function AdminMessagesPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900">Messages</h1>
+          <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
           <p className="text-gray-500 mt-1">
-            Contact form submissions from your website
+            {t("subtitle")}
           </p>
         </div>
         {unreadCount > 0 && (
           <span className="bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
-            {unreadCount} unread
+            {unreadCount} {t("unread")}
           </span>
         )}
       </div>
@@ -85,7 +87,7 @@ export default function AdminMessagesPage() {
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            {tab}
+            {t(`filters.${tab}`)}
             {tab === "unread" && unreadCount > 0 && (
               <span className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                 {unreadCount}
@@ -105,7 +107,7 @@ export default function AdminMessagesPage() {
           ) : messages.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-100 p-10 text-center">
               <Mail className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">No messages found</p>
+              <p className="text-gray-400 text-sm">{t("noMessages")}</p>
             </div>
           ) : (
             messages.map((msg) => (
@@ -150,7 +152,7 @@ export default function AdminMessagesPage() {
                 <div>
                   <h2 className="text-lg font-bold text-zinc-900">{selected.subject}</h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    From <span className="font-medium text-zinc-700">{selected.name}</span>
+                    {t("from")} <span className="font-medium text-zinc-700">{selected.name}</span>
                     {" · "}
                     <a href={`mailto:${selected.email}`} className="text-blue-500 hover:underline">
                       {selected.email}
@@ -166,15 +168,15 @@ export default function AdminMessagesPage() {
                     className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition"
                   >
                     {selected.read
-                      ? <><Mail className="w-3.5 h-3.5" /> Mark unread</>
-                      : <><MailOpen className="w-3.5 h-3.5" /> Mark read</>
+                      ? <><Mail className="w-3.5 h-3.5" /> {t("markUnread")}</>
+                      : <><MailOpen className="w-3.5 h-3.5" />{t("markRead")}</>
                     }
                   </button>
                   <a
                     href={`mailto:${selected.email}?subject=Re: ${selected.subject}`}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-lg text-xs font-medium text-white transition"
                   >
-                    Reply →
+                    {t("reply")}
                   </a>
                 </div>
               </div>
@@ -190,7 +192,7 @@ export default function AdminMessagesPage() {
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 p-10 text-center h-full flex flex-col items-center justify-center">
               <Mail className="w-10 h-10 text-gray-200 mb-3" />
-              <p className="text-gray-400 text-sm">Select a message to read it</p>
+              <p className="text-gray-400 text-sm">{t("selectMessage")}</p>
             </div>
           )}
         </div>

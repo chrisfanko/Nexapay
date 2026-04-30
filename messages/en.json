@@ -431,5 +431,188 @@
     "hasAccount": "Already have an account",
     "signIn": "Sign In"
   }
+},
+"dashboardSidebar": {
+  "merchantDashboard": "Merchant Dashboard",
+  "links": {
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "developerPortal": "Developer Portal"
+  },
+  "signedInAs": "Signed in as",
+  "backToHome": "Back to Home"
+},
+"dashboardOverview": {
+  "welcome": "Welcome,",
+  "subtitle": "Here's an overview of your payment activity on NexaPay.",
+  "modeBanner": "You are viewing",
+  "testTransactions": "test transactions",
+  "noRealMoney": "— no real money involved.",
+  "test": "Test",
+  "live": "Live",
+  "stats": {
+    "totalVolume": "Total Volume",
+    "totalTransactions": "Total Transactions",
+    "successful": "Successful",
+    "failed": "Failed",
+    "pending": "Pending",
+    "successRate": "Success Rate"
+  },
+  "recentTransactions": "Recent Transactions",
+  "viewAll": "View all →",
+  "table": {
+    "reference": "Reference",
+    "customer": "Customer",
+    "channel": "Channel",
+    "amount": "Amount",
+    "status": "Status",
+    "date": "Date"
+  },
+  "noTransactions": "No {mode} transactions yet"
+},
+"dashboardTransactions": {
+  "title": "Transactions",
+  "totalLabel": "total {mode} transactions",
+  "test": "Test",
+  "live": "Live",
+  "testBanner": "Viewing",
+  "testBannerBold": "test transactions",
+  "testBannerSuffix": "— no real money involved.",
+  "searchPlaceholder": "Search by reference...",
+  "search": "Search",
+  "allStatus": "All Status",
+  "complete": "Complete",
+  "failed": "Failed",
+  "pending": "Pending",
+  "allChannels": "All Channels",
+  "table": {
+    "reference": "Reference",
+    "customer": "Customer",
+    "channel": "Channel",
+    "amount": "Amount",
+    "fee": "NexaPay Fee",
+    "net": "Net",
+    "status": "Status",
+    "date": "Date"
+  },
+  "noTransactions": "No {mode} transactions found",
+  "page": "Page",
+  "of": "of",
+  "previous": "Previous",
+  "next": "Next"
+},
+"adminSidebar": {
+  "title": "Admin Panel",
+  "links": {
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "merchants": "Merchants",
+    "businesses": "Businesses",
+    "messages": "Messages"
+  },
+  "signedInAs": "Signed in as",
+  "backToHome": "Back to Home"
+},
+"adminOverview": {
+  "title": "Admin Overview",
+  "subtitle": "Platform-wide stats across all merchants and transactions.",
+  "stats": {
+    "totalVolume": "Total Volume",
+    "totalFees": "NexaPay Fees Collected",
+    "totalTransactions": "Total Transactions",
+    "totalMerchants": "Total Merchants",
+    "successful": "Successful",
+    "failed": "Failed",
+    "pending": "Pending",
+    "successRate": "Success Rate"
+  },
+  "quickLinks": {
+    "transactions": "View All Transactions",
+    "transactionsDesc": "Filter, search and review every transaction",
+    "merchants": "View All Merchants",
+    "merchantsDesc": "See all registered users on NexaPay"
+  }
+},
+"adminBusinesses": {
+  "title": "Business Applications",
+  "subtitle": "Review and approve merchant business applications",
+  "filters": {
+    "all": "All",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "noApplications": "No applications found",
+  "fields": {
+    "type": "Type",
+    "country": "Country",
+    "phone": "Phone",
+    "applied": "Applied"
+  },
+  "rejectionReason": "Rejection reason",
+  "approve": "Approve",
+  "reject": "Reject",
+  "rejectModal": {
+    "title": "Reject Application",
+    "subtitle": "Please provide a reason for rejection. This will be shown to the merchant.",
+    "placeholder": "e.g. Incomplete information, business type not supported...",
+    "cancel": "Cancel",
+    "confirm": "Confirm Reject"
+  }
+},
+"adminMessages": {
+  "title": "Messages",
+  "subtitle": "Contact form submissions from your website",
+  "unread": "unread",
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "read": "Read"
+  },
+  "noMessages": "No messages found",
+  "selectMessage": "Select a message to read it",
+  "from": "From",
+  "markUnread": "Mark unread",
+  "markRead": "Mark read",
+  "reply": "Reply →"
+},
+"adminMerchants": {
+  "title": "Merchants",
+  "subtitle": "All registered users on NexaPay —",
+  "total": "total",
+  "noMerchants": "No merchants yet",
+  "noKey": "No key yet",
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "apiKey": "API Key",
+    "joined": "Joined"
+  }
+},
+"adminTransactions": {
+  "title": "All Transactions",
+  "subtitle": "total transactions across all merchants",
+  "searchPlaceholder": "Search by reference...",
+  "search": "Search",
+  "allStatus": "All Status",
+  "complete": "Complete",
+  "failed": "Failed",
+  "pending": "Pending",
+  "allChannels": "All Channels",
+  "noTransactions": "No transactions found",
+  "table": {
+    "reference": "Reference",
+    "customer": "Customer",
+    "channel": "Channel",
+    "gross": "Gross",
+    "fee": "NexaPay Fee",
+    "net": "Net",
+    "status": "Status",
+    "date": "Date"
+  },
+  "page": "Page",
+  "of": "of",
+  "previous": "Previous",
+  "next": "Next"
 }
 }

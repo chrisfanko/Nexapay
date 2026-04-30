@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { TrendingUp, CheckCircle, XCircle, Clock, ArrowLeftRight, FlaskConical, Zap } from "lucide-react";
 
 interface Stats {
@@ -39,6 +40,7 @@ const statusEmoji = {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const t = useTranslations("dashboardOverview");
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<"live" | "test">("live");
@@ -53,7 +55,7 @@ export default function DashboardPage() {
       .catch(() => setLoading(false));
   }, [mode]);
 
-  const handleModeChange = (newMode: 'live' | 'test') => {
+  const handleModeChange = (newMode: "live" | "test") => {
     setMode(newMode);
     setLoading(true);
     setStats(null);
@@ -61,37 +63,37 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: "Total Volume",
+      label: t("stats.totalVolume"),
       value: stats ? `${stats.totalVolume.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} XAF` : "—",
       icon: <TrendingUp className="w-5 h-5 text-blue-500" />,
       bg: "bg-blue-50",
     },
     {
-      label: "Total Transactions",
+      label: t("stats.totalTransactions"),
       value: stats?.totalTransactions ?? "—",
       icon: <ArrowLeftRight className="w-5 h-5 text-purple-500" />,
       bg: "bg-purple-50",
     },
     {
-      label: "Successful",
+      label: t("stats.successful"),
       value: stats?.successfulTransactions ?? "—",
       icon: <CheckCircle className="w-5 h-5 text-green-500" />,
       bg: "bg-green-50",
     },
     {
-      label: "Failed",
+      label: t("stats.failed"),
       value: stats?.failedTransactions ?? "—",
       icon: <XCircle className="w-5 h-5 text-red-500" />,
       bg: "bg-red-50",
     },
     {
-      label: "Pending",
+      label: t("stats.pending"),
       value: stats?.pendingTransactions ?? "—",
       icon: <Clock className="w-5 h-5 text-yellow-500" />,
       bg: "bg-yellow-50",
     },
     {
-      label: "Success Rate",
+      label: t("stats.successRate"),
       value: stats ? `${stats.successRate}%` : "—",
       icon: <TrendingUp className="w-5 h-5 text-blue-500" />,
       bg: "bg-blue-50",
@@ -104,11 +106,9 @@ export default function DashboardPage() {
       <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-black text-zinc-900">
-            Welcome, {session?.user?.name} 👋
+            {t("welcome")} {session?.user?.name} 👋
           </h1>
-          <p className="text-gray-500 mt-1">
-            Here&apos;s an overview of your payment activity on NexaPay.
-          </p>
+          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
         </div>
 
         {/* TEST / LIVE toggle */}
@@ -122,7 +122,7 @@ export default function DashboardPage() {
             }`}
           >
             <FlaskConical className="w-4 h-4" />
-            Test
+            {t("test")}
           </button>
           <button
             onClick={() => handleModeChange("live")}
@@ -133,7 +133,7 @@ export default function DashboardPage() {
             }`}
           >
             <Zap className="w-4 h-4" />
-            Live
+            {t("live")}
           </button>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
       {mode === "test" && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700">
           <FlaskConical className="w-4 h-4 shrink-0" />
-          You are viewing <strong>test transactions</strong> — no real money involved.
+          {t("modeBanner")} <strong className="mx-1">{t("testTransactions")}</strong> {t("noRealMoney")}
         </div>
       )}
 
@@ -170,9 +170,9 @@ export default function DashboardPage() {
       {/* Recent Transactions */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-zinc-900">Recent Transactions</h2>
+          <h2 className="text-lg font-bold text-zinc-900">{t("recentTransactions")}</h2>
           <Link href="/dashboard/transactions" className="text-sm text-blue-500 font-medium hover:text-blue-700 transition">
-            View all →
+            {t("viewAll")}
           </Link>
         </div>
 
@@ -180,29 +180,19 @@ export default function DashboardPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Reference</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Customer</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Channel</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Amount</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Status</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Date</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.reference")}</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.customer")}</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.channel")}</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.amount")}</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.status")}</th>
+                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i}>
-                    {[...Array(6)].map((_, j) => (
-                      <td key={j} className="px-5 py-3">
-                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : !stats?.recentTransactions?.length ? (
+              {!stats?.recentTransactions?.length ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
-                    No {mode} transactions yet
+                    {t("noTransactions", { mode })}
                   </td>
                 </tr>
               ) : (
