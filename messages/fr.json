@@ -720,6 +720,74 @@
   "of": "sur",
   "previous": "Précédent",
   "next": "Suivant"
+},
+"registerBusiness": {
+  "loading": "Chargement...",
+  "success": {
+    "title": "Demande soumise !",
+    "desc": "Votre demande d'entreprise est en cours d'examen. Nous vous notifierons une fois approuvée. Cela prend généralement 24 à 48 heures.",
+    "pendingLabel": "en attente d'approbation",
+    "pendingDesc": "Les clés API et les webhooks seront disponibles une fois approuvés.",
+    "goToDashboard": "Aller au tableau de bord"
+  },
+  "title": "Enregistrez votre entreprise",
+  "subtitle": "Complétez votre profil d'entreprise pour accéder aux clés API, aux webhooks et au portail développeur.",
+  "steps": {
+    "signUp": "Inscription",
+    "registerBusiness": "Enregistrer l'entreprise",
+    "getApproved": "Obtenir l'approbation",
+    "startIntegrating": "Commencer l'intégration"
+  },
+  "form": {
+    "companyName": "Nom de l'entreprise",
+    "companyNamePlaceholder": "Acme Corp",
+    "businessType": "Type d'entreprise",
+    "businessTypePlaceholder": "Sélectionner un type...",
+    "country": "Pays",
+    "countryPlaceholder": "Sélectionner un pays...",
+    "phone": "Téléphone professionnel",
+    "website": "Site web",
+    "optional": "optionnel",
+    "description": "Description de l'entreprise",
+    "descriptionPlaceholder": "Décrivez brièvement votre activité...",
+    "submit": "Soumettre la demande",
+    "submitting": "Envoi en cours...",
+    "errorFallback": "Quelque chose s'est mal passé"
+  },
+  "alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "goToDashboard": "Aller au tableau de bord"
+},
+"paymentSuccess": {
+  "loading": "Vérification de votre paiement...",
+  "fallbackLoading": "Chargement...",
+  "failed": {
+    "title": "Paiement échoué",
+    "desc": "Nous n'avons pas pu vérifier votre paiement. Veuillez réessayer ou contacter le support.",
+    "backHome": "Retour à l'accueil"
+  },
+  "success": {
+    "title": "Paiement réussi !",
+    "desc": "Merci pour votre paiement. Votre transaction a été complétée avec succès.",
+    "reference": "Référence :",
+    "backHome": "Retour à l'accueil",
+    "viewTransactions": "Voir les transactions"
+  }
+},
+"checkout": {
+  "loading": "Chargement du paiement...",
+  "testMode": "MODE TEST",
+  "sessionNotFound": "Session introuvable",
+  "sessionExpired": "Cette session de paiement est invalide ou a expiré.",
+  "payTo": "Payer à",
+  "includesFee": "Inclut {currency} {fee} de frais de traitement",
+  "fullName": "Nom complet",
+  "phoneNumber": "Numéro de téléphone (ex. 6XXXXXXXX)",
+  "selectMethod": "Sélectionnez un mode de paiement",
+  "pay": "Payer {currency} {amount}",
+  "processing": "Traitement en cours...",
+  "enterName": "Entrez votre nom pour continuer",
+  "cancel": "Annuler et retourner au marchand",
+  "secured": "Sécurisé par NexaPay · Toutes les transactions sont chiffrées"
 }
 }
  

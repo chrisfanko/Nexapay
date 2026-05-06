@@ -614,5 +614,73 @@
   "of": "of",
   "previous": "Previous",
   "next": "Next"
+},
+"registerBusiness": {
+  "loading": "Loading...",
+  "success": {
+    "title": "Application Submitted!",
+    "desc": "Your business application is now under review. We will notify you once it is approved. This usually takes 24-48 hours.",
+    "pendingLabel": "pending approval",
+    "pendingDesc": "API keys and webhooks will be available once approved.",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "title": "Register Your Business",
+  "subtitle": "Complete your business profile to get access to API keys, webhooks, and the developer portal.",
+  "steps": {
+    "signUp": "Sign Up",
+    "registerBusiness": "Register Business",
+    "getApproved": "Get Approved",
+    "startIntegrating": "Start Integrating"
+  },
+  "form": {
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Acme Corp",
+    "businessType": "Business Type",
+    "businessTypePlaceholder": "Select type...",
+    "country": "Country",
+    "countryPlaceholder": "Select country...",
+    "phone": "Business Phone",
+    "website": "Website",
+    "optional": "optional",
+    "description": "Business Description",
+    "descriptionPlaceholder": "Briefly describe what your business does...",
+    "submit": "Submit Application",
+    "submitting": "Submitting...",
+    "errorFallback": "Something went wrong"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "goToDashboard": "Go to Dashboard"
+},
+"paymentSuccess": {
+  "loading": "Verifying your payment...",
+  "fallbackLoading": "Loading...",
+  "failed": {
+    "title": "Payment Failed",
+    "desc": "We could not verify your payment. Please try again or contact support.",
+    "backHome": "Back to Home"
+  },
+  "success": {
+    "title": "Payment Successful!",
+    "desc": "Thank you for your payment. Your transaction has been completed successfully.",
+    "reference": "Reference:",
+    "backHome": "Back to Home",
+    "viewTransactions": "View Transactions"
+  }
+},
+"checkout": {
+  "loading": "Loading payment...",
+  "testMode": "TEST MODE",
+  "sessionNotFound": "Session Not Found",
+  "sessionExpired": "This payment session is invalid or has expired.",
+  "payTo": "Pay to",
+  "includesFee": "Includes {currency} {fee} processing fee",
+  "fullName": "Full Name",
+  "phoneNumber": "Phone Number (e.g. 6XXXXXXXX)",
+  "selectMethod": "Select payment method",
+  "pay": "Pay {currency} {amount}",
+  "processing": "Processing...",
+  "enterName": "Enter your name to continue",
+  "cancel": "Cancel and return to merchant",
+  "secured": "Secured by NexaPay · All transactions are encrypted"
 }
 }

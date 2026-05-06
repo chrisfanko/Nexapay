@@ -719,5 +719,73 @@
   "of": "de",
   "previous": "Anterior",
   "next": "Siguiente"
+},
+"registerBusiness": {
+  "loading": "Cargando...",
+  "success": {
+    "title": "¡Solicitud enviada!",
+    "desc": "Tu solicitud de empresa está siendo revisada. Te notificaremos una vez aprobada. Esto suele tardar 24-48 horas.",
+    "pendingLabel": "pendiente de aprobación",
+    "pendingDesc": "Las claves API y los webhooks estarán disponibles una vez aprobados.",
+    "goToDashboard": "Ir al panel"
+  },
+  "title": "Registra tu empresa",
+  "subtitle": "Completa tu perfil empresarial para acceder a claves API, webhooks y el portal de desarrollador.",
+  "steps": {
+    "signUp": "Registrarse",
+    "registerBusiness": "Registrar empresa",
+    "getApproved": "Obtener aprobación",
+    "startIntegrating": "Comenzar integración"
+  },
+  "form": {
+    "companyName": "Nombre de la empresa",
+    "companyNamePlaceholder": "Acme Corp",
+    "businessType": "Tipo de empresa",
+    "businessTypePlaceholder": "Seleccionar tipo...",
+    "country": "País",
+    "countryPlaceholder": "Seleccionar país...",
+    "phone": "Teléfono empresarial",
+    "website": "Sitio web",
+    "optional": "opcional",
+    "description": "Descripción de la empresa",
+    "descriptionPlaceholder": "Describe brevemente tu negocio...",
+    "submit": "Enviar solicitud",
+    "submitting": "Enviando...",
+    "errorFallback": "Algo salió mal"
+  },
+  "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+  "goToDashboard": "Ir al panel"
+},
+"paymentSuccess": {
+  "loading": "Verificando tu pago...",
+  "fallbackLoading": "Cargando...",
+  "failed": {
+    "title": "Pago fallido",
+    "desc": "No pudimos verificar tu pago. Por favor intenta de nuevo o contacta soporte.",
+    "backHome": "Volver al inicio"
+  },
+  "success": {
+    "title": "¡Pago exitoso!",
+    "desc": "Gracias por tu pago. Tu transacción se completó exitosamente.",
+    "reference": "Referencia:",
+    "backHome": "Volver al inicio",
+    "viewTransactions": "Ver transacciones"
+  }
+},
+"checkout": {
+  "loading": "Cargando pago...",
+  "testMode": "MODO PRUEBA",
+  "sessionNotFound": "Sesión no encontrada",
+  "sessionExpired": "Esta sesión de pago es inválida o ha expirado.",
+  "payTo": "Pagar a",
+  "includesFee": "Incluye {currency} {fee} de tarifa de procesamiento",
+  "fullName": "Nombre completo",
+  "phoneNumber": "Número de teléfono (ej. 6XXXXXXXX)",
+  "selectMethod": "Selecciona método de pago",
+  "pay": "Pagar {currency} {amount}",
+  "processing": "Procesando...",
+  "enterName": "Ingresa tu nombre para continuar",
+  "cancel": "Cancelar y volver al comerciante",
+  "secured": "Protegido por NexaPay · Todas las transacciones están cifradas"
 }
 }
