@@ -1,204 +1,88 @@
 "use client";
 
-import { Shield, Zap, Globe, Smartphone } from "lucide-react";
+import { Globe2, ShieldCheck, Smartphone, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-const Features = () => {
+export default function Features() {
   const t = useTranslations("features");
 
   const features = [
     {
-      icon: <Shield className="w-7 h-7" />,
+      icon: ShieldCheck,
       title: t("secure.title"),
       description: t("secure.description"),
       tag: t("secure.tag"),
-      color: "#1E6FFF",
-      glow: "rgba(30,111,255,0.2)",
-      bg: "rgba(30,111,255,0.1)",
-      border: "rgba(30,111,255,0.25)",
     },
     {
-      icon: <Zap className="w-7 h-7" />,
+      icon: Zap,
       title: t("fast.title"),
       description: t("fast.description"),
       tag: t("fast.tag"),
-      color: "#00D4AA",
-      glow: "rgba(0,212,170,0.2)",
-      bg: "rgba(0,212,170,0.1)",
-      border: "rgba(0,212,170,0.25)",
     },
     {
-      icon: <Globe className="w-7 h-7" />,
+      icon: Globe2,
       title: t("global.title"),
       description: t("global.description"),
       tag: t("global.tag"),
-      color: "#A78BFA",
-      glow: "rgba(167,139,250,0.2)",
-      bg: "rgba(167,139,250,0.1)",
-      border: "rgba(167,139,250,0.25)",
     },
     {
-      icon: <Smartphone className="w-7 h-7" />,
+      icon: Smartphone,
       title: t("mobile.title"),
       description: t("mobile.description"),
       tag: t("mobile.tag"),
-      color: "#F59E0B",
-      glow: "rgba(245,158,11,0.2)",
-      bg: "rgba(245,158,11,0.1)",
-      border: "rgba(245,158,11,0.25)",
     },
   ];
 
   return (
-    <section style={{
-      background: "linear-gradient(180deg, #050A14 0%, #0A1628 100%)",
-      padding: "100px 5%",
-      position: "relative",
-      overflow: "hidden",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        .features-section { font-family: 'DM Sans', sans-serif; }
-        .feature-card {
-          border-radius: 20px;
-          padding: 32px;
-          border: 1px solid;
-          transition: all 0.35s cubic-bezier(.16,1,.3,1);
-          position: relative;
-          overflow: hidden;
-          cursor: default;
-        }
-        .feature-card:hover { transform: translateY(-6px); }
-        .feature-icon-circle {
-          width: 60px;
-          height: 60px;
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
-          transition: transform 0.3s;
-          flex-shrink: 0;
-        }
-        .feature-card:hover .feature-icon-circle { transform: scale(1.1); }
-        .feature-tag {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          margin-bottom: 10px;
-          display: block;
-        }
-        .feature-title {
-          font-family: 'Syne', sans-serif;
-          font-size: 20px;
-          font-weight: 700;
-          color: #fff;
-          margin-bottom: 10px;
-        }
-        .feature-desc {
-          font-size: 14px;
-          color: rgba(255,255,255,0.45);
-          line-height: 1.7;
-          font-weight: 300;
-        }
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
-          max-width: 900px;
-          margin: 0 auto;
-        }
-        @media (max-width: 640px) {
-          .features-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-20">
+          <div className="max-w-md">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+              {t("badge")}
+            </p>
 
-      {/* Background glow */}
-      <div style={{
-        position: "absolute",
-        top: "10%", left: "50%",
-        transform: "translateX(-50%)",
-        width: "600px", height: "300px",
-        background: "radial-gradient(ellipse, rgba(30,111,255,0.07) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A] sm:text-4xl">
+              {t("headline1")}
+              <br />
+              <span className="text-[#1E6FFF]">{t("headline2")}</span>
+            </h2>
 
-      <div className="features-section">
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <span style={{
-            display: "inline-block",
-            background: "rgba(0,212,170,0.1)",
-            border: "1px solid rgba(0,212,170,0.25)",
-            color: "#00D4AA",
-            fontSize: 12,
-            fontWeight: 600,
-            padding: "6px 16px",
-            borderRadius: 100,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            marginBottom: 20,
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
-            {t("badge")}
-          </span>
-          <h2 style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: "clamp(32px, 4vw, 48px)",
-            fontWeight: 800,
-            color: "#fff",
-            letterSpacing: "-0.02em",
-            marginBottom: 16,
-            lineHeight: 1.1,
-          }}>
-            {t("headline1")}<br />
-            <span style={{ color: "#1E6FFF" }}>{t("headline2")}</span>
-          </h2>
-          <p style={{
-            color: "rgba(255,255,255,0.4)",
-            fontSize: 16,
-            maxWidth: 480,
-            margin: "0 auto",
-            lineHeight: 1.7,
-            fontWeight: 300,
-          }}>
-            {t("subheadline")}
-          </p>
-        </div>
+            <p className="mt-5 text-base leading-7 text-slate-600">
+              {t("subheadline")}
+            </p>
+          </div>
 
-        {/* Cards */}
-        <div className="features-grid">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="feature-card"
-              style={{
-                background: "rgba(255,255,255,0.03)",
-                borderColor: f.border,
-                boxShadow: `0 4px 24px ${f.glow}`,
-                borderTop: `3px solid ${f.color}`,
-              }}
-            >
-              <div
-                className="feature-icon-circle"
-                style={{
-                  background: f.bg,
-                  border: `1px solid ${f.border}`,
-                  color: f.color,
-                }}
-              >
-                {f.icon}
-              </div>
-              <span className="feature-tag" style={{ color: f.color }}>{f.tag}</span>
-              <div className="feature-title">{f.title}</div>
-              <div className="feature-desc">{f.description}</div>
-            </div>
-          ))}
+          <div className="grid border-l border-t border-slate-200 sm:grid-cols-2">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+
+              return (
+                <article
+                  key={feature.title}
+                  className="border-b border-r border-slate-200 p-6 sm:p-7"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-[#1E6FFF]">
+                    <Icon className="size-5" />
+                  </div>
+
+                  <p className="mt-8 text-xs font-semibold uppercase tracking-[0.14em] text-[#1E6FFF]">
+                    {feature.tag}
+                  </p>
+
+                  <h3 className="mt-3 text-base font-semibold text-[#0A0A0A]">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
+                    {feature.description}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default Features;
+}

@@ -682,5 +682,9 @@
   "enterName": "Enter your name to continue",
   "cancel": "Cancel and return to merchant",
   "secured": "Secured by NexaPay · All transactions are encrypted"
+},
+"docs": {
+  "title": "API documentation",
+  "subtitle": "Build secure payment flows with PayFlow's REST API, SDKs, and webhook events."
 }
 }

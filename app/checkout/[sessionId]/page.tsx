@@ -1,8 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import {
+  Check,
+  CircleAlert,
+  LoaderCircle,
+  LockKeyhole,
+  ShieldCheck,
+} from "lucide-react";
 import PaypalButton from "@/components/ui/PaypalButton";
 
 type Session = {
@@ -24,12 +32,45 @@ type Session = {
 };
 
 const PAYMENT_METHODS = [
-  { id: "mtn_money", label: "MTN Money", icon: "📱", currency: ["XAF", "XOF"], needsPhone: true },
-  { id: "orange_money", label: "Orange Money", icon: "🟠", currency: ["XAF", "XOF"], needsPhone: true },
-  { id: "paypal", label: "PayPal", icon: "🅿️", currency: ["USD", "EUR", "GBP", "CAD", "XAF"], needsPhone: false },
-  { id: "visa", label: "Visa", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false },
-  { id: "mastercard", label: "Mastercard", icon: "💳", currency: ["USD", "EUR", "XAF"], needsPhone: false },
+  {
+    id: "mtn_money",
+    label: "MTN Money",
+    logo: "/logos/mtn3.png",
+    currency: ["XAF", "XOF"],
+    needsPhone: true,
+  },
+  {
+    id: "orange_money",
+    label: "Orange Money",
+    logo: "/logos/om.png",
+    currency: ["XAF", "XOF"],
+    needsPhone: true,
+  },
+  {
+    id: "paypal",
+    label: "PayPal",
+    logo: "/logos/paypal.png",
+    currency: ["USD", "EUR", "GBP", "CAD", "XAF"],
+    needsPhone: false,
+  },
+  {
+    id: "visa",
+    label: "Visa",
+    logo: "/logos/visa.png",
+    currency: ["USD", "EUR", "XAF"],
+    needsPhone: false,
+  },
+  {
+    id: "mastercard",
+    label: "Mastercard",
+    logo: "/logos/mastercard.png",
+    currency: ["USD", "EUR", "XAF"],
+    needsPhone: false,
+  },
 ];
+
+const fieldClassName =
+  "w-full border border-slate-300 bg-white px-3.5 py-3 text-sm text-[#0A0A0A] outline-none transition placeholder:text-slate-400 focus:border-[#1E6FFF] focus:ring-2 focus:ring-blue-100";
 
 export default function CheckoutPage() {
   const { sessionId } = useParams();
@@ -48,169 +89,371 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     fetch(`/api/checkout/session?sessionId=${sessionId}`)
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => {
-        if (data.error) { setError(data.error); }
-        else {
-          setSession(data.session);
-          if (data.session.customerName) setName(data.session.customerName);
-          if (data.session.customerEmail) setEmail(data.session.customerEmail);
-          if (data.session.customerPhone) setPhone(data.session.customerPhone);
+        if (data.error) {
+          setError(data.error);
+          return;
         }
-        setLoading(false);
+
+        setSession(data.session);
+        setName(data.session.customerName || "");
+        setEmail(data.session.customerEmail || "");
+        setPhone(data.session.customerPhone || "");
       })
-      .catch(() => { setError(t("sessionExpired")); setLoading(false); });
+      .catch(() => setError(t("sessionExpired")))
+      .finally(() => setLoading(false));
   }, [sessionId, t]);
 
-  const selectedMethodData = PAYMENT_METHODS.find((m) => m.id === selectedMethod);
+  const selectedMethodData = PAYMENT_METHODS.find(
+    (method) => method.id === selectedMethod
+  );
   const needsPhone = selectedMethodData?.needsPhone ?? false;
   const isPayPal = selectedMethod === "paypal";
-  const availableMethods = PAYMENT_METHODS.filter((m) => !session || m.currency.includes(session.currency));
+
+  const availableMethods = PAYMENT_METHODS.filter(
+    (method) => !session || method.currency.includes(session.currency)
+  );
 
   const handlePay = async () => {
     if (!selectedMethod || !session) return;
+
     setPaying(true);
     setPayError("");
+
     try {
-      const res = await fetch("/api/checkout/pay", {
+      const response = await fetch("/api/checkout/pay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, method: selectedMethod, name, phone, email }),
+        body: JSON.stringify({
+          sessionId,
+          method: selectedMethod,
+          name,
+          phone,
+          email,
+        }),
       });
-      const data = await res.json();
-      if (!res.ok) { setPayError(data.error || t("sessionExpired")); setPaying(false); return; }
-      if (data.authorization_url) { router.push(data.authorization_url); }
-      else { setPayError(t("sessionExpired")); setPaying(false); }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setPayError(data.error || t("sessionExpired"));
+        return;
+      }
+
+      if (data.authorization_url) {
+        router.push(data.authorization_url);
+        return;
+      }
+
+      setPayError(t("sessionExpired"));
     } catch {
       setPayError(t("sessionExpired"));
+    } finally {
       setPaying(false);
     }
   };
 
-  const isFormValid = name && (!needsPhone || phone) && selectedMethod;
-
   if (loading) {
-    return (
-      <main className="min-h-screen bg-linear-to-br from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">{t("loading")}</p>
-        </div>
-      </main>
-    );
+    return <CheckoutState message={t("loading")} loading />;
   }
 
   if (error || !session) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-        <div className="bg-white shadow-lg rounded-2xl p-12 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold text-red-600 mb-2">{t("sessionNotFound")}</h1>
-          <p className="text-gray-500">{error || t("sessionExpired")}</p>
-        </div>
-      </main>
+      <CheckoutState
+        description={error || t("sessionExpired")}
+        message={t("sessionNotFound")}
+      />
     );
   }
 
+  const grossAmount = session.grossAmount || session.amount;
+  const formattedAmount = new Intl.NumberFormat().format(grossAmount);
+  const isFormValid = Boolean(name && selectedMethod && (!needsPhone || phone));
+
   const paypalCurrencies = ["USD", "EUR", "GBP", "CAD"];
-  const paypalCurrency = paypalCurrencies.includes(session.currency) ? session.currency : "USD";
-  const paypalAmount = session.currency === "XAF"
-    ? (session.amount / 655).toFixed(2)
-    : session.amount.toFixed(2);
+  const paypalCurrency = paypalCurrencies.includes(session.currency)
+    ? session.currency
+    : "USD";
+  const paypalAmount =
+    session.currency === "XAF"
+      ? (session.amount / 655).toFixed(2)
+      : session.amount.toFixed(2);
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-blue-50 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-black text-sm">N</span>
-            </div>
-            <span className="text-xl font-bold text-gray-800">
-              Nexa<span className="text-blue-600">Pay</span>
-            </span>
-          </div>
-          {session.mode === "test" && (
-            <span className="block text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-medium">
-              {t("testMode")}
-            </span>
-          )}
-        </div>
+    <main className="min-h-screen bg-slate-50 text-[#0A0A0A]">
+      <CheckoutHeader testMode={session.mode === "test"} />
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-blue-600 px-6 py-4 text-white text-center">
-            <p className="text-xs text-blue-100 mb-1">{t("payTo")} {session.merchantName}</p>
-            <p className="text-3xl font-black">
-              {session.currency} {(session.grossAmount || session.amount).toLocaleString()}
-            </p>
-            {session.nexapayFee > 0 && (
-              <p className="text-xs text-blue-200 mt-1">
-                {t("includesFee", { currency: session.currency, fee: session.nexapayFee.toLocaleString() })}
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid w-full overflow-hidden border border-slate-200 bg-white lg:grid-cols-[minmax(0,1fr)_360px]">
+          <section className="p-5 sm:p-8">
+            <div className="border-b border-slate-200 pb-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+                {t("payTo")}
               </p>
-            )}
-            {session.description && (
-              <p className="text-xs text-blue-100 mt-1">{session.description}</p>
-            )}
-          </div>
-
-          <div className="p-5 space-y-4">
-            <div className="space-y-2">
-              <input type="text" placeholder={t("fullName")} value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500" />
-              {needsPhone && (
-                <input type="tel" placeholder={t("phoneNumber")} value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500" />
+              <h1 className="mt-3 text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">
+                {session.merchantName}
+              </h1>
+              {session.description && (
+                <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                  {session.description}
+                </p>
               )}
             </div>
 
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-2">{t("selectMethod")}</p>
-              <div className="grid grid-cols-2 gap-2">
-                {availableMethods.map((method) => (
-                  <button key={method.id} onClick={() => setSelectedMethod(method.id)}
-                    className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl border-2 transition-all text-center ${
-                      selectedMethod === method.id ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-blue-300"
-                    }`}>
-                    <span className="text-xl">{method.icon}</span>
-                    <span className="text-xs font-medium text-gray-700 leading-tight">{method.label}</span>
-                    {selectedMethod === method.id && <span className="text-xs text-blue-600">✓</span>}
-                  </button>
-                ))}
+            <div className="mt-7">
+              <label
+                className="text-sm font-semibold text-[#0A0A0A]"
+                htmlFor="customer-name"
+              >
+                {t("fullName")}
+              </label>
+              <input
+                className={`${fieldClassName} mt-2`}
+                id="customer-name"
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t("fullName")}
+                type="text"
+                value={name}
+              />
+            </div>
+
+            {needsPhone && (
+              <div className="mt-5">
+                <label
+                  className="text-sm font-semibold text-[#0A0A0A]"
+                  htmlFor="customer-phone"
+                >
+                  {t("phoneNumber")}
+                </label>
+                <input
+                  className={`${fieldClassName} mt-2`}
+                  id="customer-phone"
+                  onChange={(event) => setPhone(event.target.value)}
+                  placeholder={t("phoneNumber")}
+                  type="tel"
+                  value={phone}
+                />
+              </div>
+            )}
+
+            <div className="mt-8">
+              <p className="text-sm font-semibold text-[#0A0A0A]">
+                {t("selectMethod")}
+              </p>
+
+              <div className="mt-3 grid border-l border-t border-slate-200 sm:grid-cols-2">
+                {availableMethods.map((method) => {
+                  const isSelected = selectedMethod === method.id;
+
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className={`relative flex min-h-24 items-center gap-4 border-b border-r border-slate-200 p-4 text-left transition-colors ${
+                        isSelected
+                          ? "bg-blue-50"
+                          : "bg-white hover:bg-slate-50"
+                      }`}
+                      key={method.id}
+                      onClick={() => {
+                        setSelectedMethod(method.id);
+                        setPayError("");
+                      }}
+                      type="button"
+                    >
+                      <span className="relative flex size-11 shrink-0 items-center justify-center border border-slate-200 bg-white p-2">
+                        <Image
+                          alt={`${method.label} logo`}
+                          className="object-contain"
+                          fill
+                          sizes="44px"
+                          src={method.logo}
+                        />
+                      </span>
+
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-[#0A0A0A]">
+                          {method.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          {method.needsPhone
+                            ? "Pay securely using your mobile money account."
+                            : "Continue securely with this payment method."}
+                        </span>
+                      </span>
+
+                      {isSelected && (
+                        <span className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-[#1E6FFF] text-white">
+                          <Check className="size-3.5" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {payError && (
-              <p className="text-xs text-red-600 bg-red-50 px-4 py-2 rounded-lg">{payError}</p>
+              <div
+                className="mt-6 flex gap-3 border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-800"
+                role="alert"
+              >
+                <CircleAlert className="mt-0.5 size-4 shrink-0" />
+                <p>{payError}</p>
+              </div>
             )}
 
-            {isPayPal && name ? (
-              <PaypalButton amount={paypalAmount} currency={paypalCurrency}
-                sessionId={sessionId as string} redirectUrl={session.successUrl} />
-            ) : (
-              <button onClick={handlePay} disabled={!isFormValid || paying || isPayPal}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors">
-                {paying ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t("processing")}
-                  </span>
-                ) : isPayPal && !name ? t("enterName")
-                  : t("pay", { currency: session.currency, amount: (session.grossAmount || session.amount).toLocaleString() })}
-              </button>
-            )}
+            <div className="mt-8">
+              {isPayPal && name ? (
+                <PaypalButton
+                  amount={paypalAmount}
+                  currency={paypalCurrency}
+                  customerEmail={email}
+                  customerName={name}
+                  customerPhone={phone}
+                  redirectUrl={session.successUrl}
+                  sessionId={sessionId as string}
+                />
+              ) : (
+                <button
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#1E6FFF] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#175ED8] disabled:cursor-not-allowed disabled:bg-slate-300"
+                  disabled={!isFormValid || paying || isPayPal}
+                  onClick={handlePay}
+                  type="button"
+                >
+                  {paying ? (
+                    <>
+                      <LoaderCircle className="size-4 animate-spin" />
+                      {t("processing")}
+                    </>
+                  ) : isPayPal && !name ? (
+                    t("enterName")
+                  ) : (
+                    t("pay", {
+                      currency: session.currency,
+                      amount: formattedAmount,
+                    })
+                  )}
+                </button>
+              )}
 
-            {session.cancelUrl && (
-              <button onClick={() => router.push(session.cancelUrl!)}
-                className="w-full text-xs text-gray-400 hover:text-gray-600 text-center">
-                {t("cancel")}
-              </button>
-            )}
-          </div>
+              {session.cancelUrl && (
+                <button
+                  className="mt-4 w-full text-center text-xs font-medium text-slate-500 transition-colors hover:text-[#0A0A0A]"
+                  onClick={() => router.push(session.cancelUrl!)}
+                  type="button"
+                >
+                  {t("cancel")}
+                </button>
+              )}
+            </div>
+          </section>
+
+          <aside className="border-t border-slate-200 bg-[#0A0A0A] p-6 text-white sm:p-8 lg:border-l lg:border-t-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+              Payment summary
+            </p>
+
+            <div className="mt-8 border-y border-white/15 py-6">
+              <p className="text-sm text-slate-400">Amount to pay</p>
+              <p className="mt-2 text-4xl font-semibold tracking-[-0.05em]">
+                {session.currency} {formattedAmount}
+              </p>
+            </div>
+
+            <div className="divide-y divide-white/10">
+              <SummaryRow
+                label="Order amount"
+                value={`${session.currency} ${new Intl.NumberFormat().format(
+                  session.merchantAmount || session.amount
+                )}`}
+              />
+              {session.nexapayFee > 0 && (
+                <SummaryRow
+                  label={t("includesFee", {
+                    currency: session.currency,
+                    fee: new Intl.NumberFormat().format(session.nexapayFee),
+                  })}
+                  value=""
+                />
+              )}
+            </div>
+
+            <div className="mt-8 flex gap-3 border border-white/15 p-4">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#1E6FFF]" />
+              <p className="text-sm leading-6 text-slate-300">{t("secured")}</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function CheckoutHeader({ testMode }: { testMode: boolean }) {
+  return (
+    <header className="border-b border-slate-200 bg-white">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-9 items-center justify-center rounded-[10px] bg-[#1E6FFF] text-sm font-extrabold text-white">
+            N
+          </span>
+          <span className="text-lg font-semibold tracking-[-0.03em] text-[#0A0A0A]">
+            Nexa<span className="text-[#1E6FFF]">Pay</span>
+          </span>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-4">{t("secured")}</p>
+        {testMode ? (
+          <span className="border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-800">
+            Test mode
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
+            <LockKeyhole className="size-3.5 text-[#1E6FFF]" />
+            Secure checkout
+          </span>
+        )}
+      </div>
+    </header>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-4 text-sm">
+      <span className="leading-6 text-slate-400">{label}</span>
+      {value && <span className="shrink-0 font-medium text-slate-200">{value}</span>}
+    </div>
+  );
+}
+
+function CheckoutState({
+  description,
+  loading = false,
+  message,
+}: {
+  description?: string;
+  loading?: boolean;
+  message: string;
+}) {
+  return (
+    <main className="min-h-screen bg-slate-50">
+      <CheckoutHeader testMode={false} />
+
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
+        <div className="w-full max-w-md border border-slate-200 bg-white p-8 text-center">
+          {loading ? (
+            <LoaderCircle className="mx-auto size-6 animate-spin text-[#1E6FFF]" />
+          ) : (
+            <CircleAlert className="mx-auto size-6 text-red-600" />
+          )}
+          <h1 className="mt-5 text-2xl font-semibold tracking-[-0.04em]">
+            {message}
+          </h1>
+          {description && (
+            <p className="mt-3 text-sm leading-6 text-slate-500">{description}</p>
+          )}
+        </div>
       </div>
     </main>
   );

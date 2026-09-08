@@ -9,10 +9,13 @@ export default function DeveloperLayout({
 }) {
   return (
     <ClientSessionProvider>
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen bg-slate-50">
         <DeveloperSidebar />
-        <main className="flex-1 ml-64 p-8">
-          <MerchantGate>{children}</MerchantGate>
+
+        <main className="min-h-screen lg:ml-64">
+          <div className="mx-auto max-w-7xl p-5 sm:p-8 lg:p-10">
+            <MerchantGate>{children}</MerchantGate>
+          </div>
         </main>
       </div>
     </ClientSessionProvider>

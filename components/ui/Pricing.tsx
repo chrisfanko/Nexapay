@@ -1,278 +1,236 @@
 "use client";
 
-import { useState } from "react";
-import { Check } from "lucide-react";
 import Link from "next/link";
+import { ArrowRight, Check } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-const PricingSection = () => {
+export default function PricingSection() {
   const t = useTranslations("pricing");
   const [amount, setAmount] = useState(10000);
+
   const fee = Math.max(Math.round(amount * 0.015), 50);
   const gross = amount + fee;
 
-  const fmt = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat("en-US").format(value);
+
+  const plans = [
+    {
+      name: t("starter.name"),
+      price: "1.5%",
+      description: t("starter.per"),
+      features: t.raw("starter.features") as string[],
+      cta: t("starter.cta"),
+      href: "/sign-up",
+      featured: false,
+    },
+    {
+      name: t("growth.name"),
+      price: "1.5%",
+      description: t("growth.per"),
+      features: t.raw("growth.features") as string[],
+      cta: t("growth.cta"),
+      href: "/sign-up",
+      featured: true,
+    },
+    {
+      name: t("enterprise.name"),
+      price: t("enterprise.price"),
+      description: t("enterprise.per"),
+      features: t.raw("enterprise.features") as string[],
+      cta: t("enterprise.cta"),
+      href: "/contact",
+      featured: false,
+    },
+  ];
 
   return (
-    <section style={{
-      background: "linear-gradient(180deg, #0A1628 0%, #050A14 100%)",
-      padding: "100px 5%",
-      position: "relative",
-      overflow: "hidden",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-        .pricing-section { font-family: 'DM Sans', sans-serif; }
-        .pricing-card {
-          border-radius: 24px;
-          padding: 36px 32px;
-          border: 1px solid;
-          transition: all 0.35s cubic-bezier(.16,1,.3,1);
-          position: relative;
-          overflow: hidden;
-          flex: 1;
-        }
-        .pricing-card:hover { transform: translateY(-6px); }
-        .pricing-card-featured { transform: scale(1.04); }
-        .pricing-card-featured:hover { transform: scale(1.04) translateY(-6px); }
-        .pricing-feature-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 8px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-          font-size: 14px;
-          color: rgba(255,255,255,0.6);
-          font-weight: 400;
-        }
-        .pricing-feature-item:last-child { border-bottom: none; }
-        .pricing-btn {
-          display: block;
-          width: 100%;
-          text-align: center;
-          font-weight: 600;
-          font-size: 14px;
-          padding: 13px;
-          border-radius: 12px;
-          text-decoration: none;
-          transition: all 0.2s;
-          margin-top: 28px;
-          font-family: 'DM Sans', sans-serif;
-        }
-        .calc-input {
-          width: 100%;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          color: #fff;
-          font-family: 'Syne', sans-serif;
-          font-size: 24px;
-          font-weight: 700;
-          padding: 14px 18px;
-          border-radius: 14px;
-          outline: none;
-          transition: all 0.2s;
-          box-sizing: border-box;
-          margin-bottom: 16px;
-        }
-        .calc-input:focus {
-          border-color: rgba(30,111,255,0.5);
-          background: rgba(30,111,255,0.06);
-          box-shadow: 0 0 0 3px rgba(30,111,255,0.1);
-        }
-        .calc-slider {
-          width: 100%;
-          appearance: none;
-          height: 4px;
-          border-radius: 2px;
-          background: rgba(255,255,255,0.1);
-          outline: none;
-          margin-bottom: 24px;
-          cursor: pointer;
-        }
-        .calc-slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: #1E6FFF;
-          cursor: pointer;
-          box-shadow: 0 0 0 4px rgba(30,111,255,0.2);
-        }
-        .pricing-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          max-width: 1000px;
-          margin: 0 auto 80px;
-          align-items: center;
-        }
-        @media (max-width: 768px) {
-          .pricing-grid { grid-template-columns: 1fr; }
-          .pricing-card-featured { transform: none; }
-          .pricing-card-featured:hover { transform: translateY(-6px); }
-        }
-      `}</style>
-
-      <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 600, height: 300, background: "radial-gradient(ellipse, rgba(30,111,255,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
-
-      <div className="pricing-section">
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <span style={{
-            display: "inline-block",
-            background: "rgba(30,111,255,0.1)",
-            border: "1px solid rgba(30,111,255,0.25)",
-            color: "#1E6FFF",
-            fontSize: 12, fontWeight: 600,
-            padding: "6px 16px", borderRadius: 100,
-            letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20,
-          }}>
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
             {t("badge")}
-          </span>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", marginBottom: 16, lineHeight: 1.1 }}>
-            {t("headline1")}<br />
-            <span style={{ color: "#00D4AA" }}>{t("headline2")}</span>
+          </p>
+
+          <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A] sm:text-4xl">
+            {t("headline1")}
+            <br />
+            <span className="text-[#1E6FFF]">{t("headline2")}</span>
           </h2>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 16, maxWidth: 460, margin: "0 auto", lineHeight: 1.7, fontWeight: 300 }}>
+
+          <p className="mt-5 text-base leading-7 text-slate-600">
             {t("subheadline")}
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="pricing-grid">
+        <div className="mt-14 grid gap-4 lg:grid-cols-3">
+          {plans.map((plan) => (
+            <article
+              key={plan.name}
+              className={`relative flex flex-col border p-7 ${
+                plan.featured
+                  ? "border-[#0A0A0A] bg-[#0A0A0A] text-white"
+                  : "border-slate-200 bg-white text-[#0A0A0A]"
+              }`}
+            >
+              {plan.featured && (
+                <span className="absolute right-6 top-6 rounded-full bg-[#1E6FFF] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-white">
+                  {t("mostPopular")}
+                </span>
+              )}
 
-          {/* Starter */}
-          <div className="pricing-card" style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>{t("starter.name")}</p>
-            <div style={{ marginBottom: 6 }}>
-              <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 42, fontWeight: 800, color: "#fff" }}>1.5%</span>
-            </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginBottom: 28, fontWeight: 300 }}>{t("starter.per")}</p>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 20 }}>
-              {(t.raw("starter.features") as string[]).map((f) => (
-                <div className="pricing-feature-item" key={f}>
-                  <Check style={{ width: 14, height: 14, color: "#1E6FFF", flexShrink: 0 }} />
-                  {f}
-                </div>
-              ))}
-            </div>
-            <Link href="/sign-up" className="pricing-btn" style={{ background: "rgba(30,111,255,0.12)", border: "1px solid rgba(30,111,255,0.3)", color: "#1E6FFF" }}>
-              {t("starter.cta")}
-            </Link>
-          </div>
+              <p
+                className={`text-xs font-semibold uppercase tracking-[0.16em] ${
+                  plan.featured ? "text-blue-300" : "text-[#1E6FFF]"
+                }`}
+              >
+                {plan.name}
+              </p>
 
-          {/* Growth */}
-          <div className="pricing-card pricing-card-featured" style={{
-            background: "linear-gradient(135deg, rgba(30,111,255,0.15) 0%, rgba(0,212,170,0.08) 100%)",
-            borderColor: "rgba(30,111,255,0.4)",
-            boxShadow: "0 20px 60px rgba(30,111,255,0.2)",
-          }}>
-            <div style={{
-              position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)",
-              background: "#1E6FFF", color: "#fff",
-              fontSize: 11, fontWeight: 700, padding: "4px 16px",
-              borderRadius: "0 0 12px 12px", letterSpacing: "0.08em", textTransform: "uppercase",
-            }}>
-              {t("mostPopular")}
-            </div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#1E6FFF", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>{t("growth.name")}</p>
-            <div style={{ marginBottom: 6 }}>
-              <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 42, fontWeight: 800, color: "#fff" }}>1.5%</span>
-            </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 28, fontWeight: 300 }}>{t("growth.per")}</p>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 20 }}>
-              {(t.raw("growth.features") as string[]).map((f) => (
-                <div className="pricing-feature-item" key={f}>
-                  <Check style={{ width: 14, height: 14, color: "#00D4AA", flexShrink: 0 }} />
-                  {f}
-                </div>
-              ))}
-            </div>
-            <Link href="/sign-up" className="pricing-btn" style={{ background: "#1E6FFF", color: "#fff", boxShadow: "0 8px 24px rgba(30,111,255,0.35)" }}>
-              {t("growth.cta")}
-            </Link>
-          </div>
+              <p className="mt-7 text-4xl font-semibold tracking-[-0.05em]">
+                {plan.price}
+              </p>
 
-          {/* Enterprise */}
-          <div className="pricing-card" style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>{t("enterprise.name")}</p>
-            <div style={{ marginBottom: 6 }}>
-              <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 42, fontWeight: 800, color: "#fff" }}>{t("enterprise.price")}</span>
-            </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginBottom: 28, fontWeight: 300 }}>{t("enterprise.per")}</p>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 20 }}>
-              {(t.raw("enterprise.features") as string[]).map((f) => (
-                <div className="pricing-feature-item" key={f}>
-                  <Check style={{ width: 14, height: 14, color: "#A78BFA", flexShrink: 0 }} />
-                  {f}
-                </div>
-              ))}
-            </div>
-            <Link href="/contact" className="pricing-btn" style={{ background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.3)", color: "#A78BFA" }}>
-              {t("enterprise.cta")}
-            </Link>
-          </div>
+              <p
+                className={`mt-2 min-h-10 text-sm leading-6 ${
+                  plan.featured ? "text-slate-300" : "text-slate-500"
+                }`}
+              >
+                {plan.description}
+              </p>
+
+              <ul
+                className={`mt-7 border-t pt-5 ${
+                  plan.featured ? "border-white/15" : "border-slate-200"
+                }`}
+              >
+                {plan.features.map((feature) => (
+                  <li
+                    key={feature}
+                    className={`flex gap-3 border-b py-3 text-sm ${
+                      plan.featured
+                        ? "border-white/10 text-slate-200"
+                        : "border-slate-100 text-slate-600"
+                    }`}
+                  >
+                    <Check className="mt-0.5 size-4 shrink-0 text-[#1E6FFF]" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href={plan.href}
+                className={`mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
+                  plan.featured
+                    ? "bg-[#1E6FFF] text-white hover:bg-[#175ed8]"
+                    : "border border-slate-300 text-[#0A0A0A] hover:border-[#0A0A0A] hover:bg-slate-50"
+                }`}
+              >
+                {plan.cta}
+                <ArrowRight className="size-4" />
+              </Link>
+            </article>
+          ))}
         </div>
 
-        {/* Calculator */}
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 24, padding: 40,
-            position: "relative", overflow: "hidden",
-          }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #1E6FFF, #00D4AA)" }} />
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#00D4AA", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>{t("calculator.badge")}</p>
-            <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 24 }}>
+        <div className="mx-auto mt-16 max-w-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+          <div className="max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+              {t("calculator.badge")}
+            </p>
+            <h3 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#0A0A0A]">
               {t("calculator.title")}
             </h3>
-            <label style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 10, display: "block" }}>
+          </div>
+
+          <div className="mt-8">
+            <label
+              htmlFor="transaction-amount"
+              className="text-sm font-medium text-slate-700"
+            >
               {t("calculator.label")}
             </label>
-            <input
-              aria-label="transaction amt input"
-              type="number"
-              className="calc-input"
-              value={amount}
-              onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
-              min={0}
-            />
-            <input
-              aria-label="transaction amt slider"
-              type="range"
-              className="calc-slider"
-              min={500} max={500000} step={500}
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-              {[
-                { label: t("calculator.youCharge"), value: fmt(amount), color: "#fff" },
-                { label: t("calculator.nexapayFee"), value: fmt(fee), color: "#1E6FFF" },
-                { label: t("calculator.customerPays"), value: fmt(gross), color: "#00D4AA" },
-              ].map((item) => (
-                <div key={item.label} style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderRadius: 14, padding: "16px 12px", textAlign: "center",
-                }}>
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{item.label}</p>
-                  <p style={{ fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: item.color }}>{item.value}</p>
-                  <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 2 }}>XAF</p>
-                </div>
-              ))}
+
+            <div className="mt-2 flex overflow-hidden border border-slate-300 bg-white focus-within:border-[#1E6FFF] focus-within:ring-2 focus-within:ring-blue-100">
+              <input
+                id="transaction-amount"
+                type="number"
+                min="0"
+                value={amount}
+                onChange={(event) =>
+                  setAmount(Math.max(0, Number(event.target.value)))
+                }
+                className="min-w-0 flex-1 bg-transparent px-4 py-3 text-xl font-semibold tracking-[-0.03em] text-[#0A0A0A] outline-none"
+              />
+              <span className="flex items-center border-l border-slate-200 px-4 text-sm font-medium text-slate-500">
+                XAF
+              </span>
             </div>
+
+            <input
+              type="range"
+              min="500"
+              max="500000"
+              step="500"
+              value={amount}
+              onChange={(event) => setAmount(Number(event.target.value))}
+              className="mt-5 h-1 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-[#1E6FFF]"
+              aria-label={t("calculator.label")}
+            />
           </div>
-          <p style={{ textAlign: "center", marginTop: 20 }}>
-            <Link href="/prices" style={{ color: "#1E6FFF", fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
-              {t("calculator.fullDetails")}
-            </Link>
-          </p>
+
+          <div className="mt-8 grid border-l border-t border-slate-200 sm:grid-cols-3">
+            <CalculatorValue
+              label={t("calculator.youCharge")}
+              value={formatAmount(amount)}
+            />
+            <CalculatorValue
+              label={t("calculator.nexapayFee")}
+              value={formatAmount(fee)}
+              highlighted
+            />
+            <CalculatorValue
+              label={t("calculator.customerPays")}
+              value={formatAmount(gross)}
+            />
+          </div>
+
+          <Link
+            href="/prices"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#1E6FFF] transition-colors hover:text-[#175ed8]"
+          >
+            {t("calculator.fullDetails")}
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
       </div>
     </section>
   );
-};
+}
 
-export default PricingSection;
+function CalculatorValue({
+  label,
+  value,
+  highlighted = false,
+}: {
+  label: string;
+  value: string;
+  highlighted?: boolean;
+}) {
+  return (
+    <div className="border-b border-r border-slate-200 bg-white p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </p>
+      <p
+        className={`mt-3 text-xl font-semibold tracking-[-0.035em] ${
+          highlighted ? "text-[#1E6FFF]" : "text-[#0A0A0A]"
+        }`}
+      >
+        {value} <span className="text-sm font-medium text-slate-400">XAF</span>
+      </p>
+    </div>
+  );
+}

@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Mail, MailOpen, } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import {
+  CheckCheck,
+  Clock3,
+  Mail,
+  MailOpen,
+  MessageSquareText,
+  Search,
+} from "lucide-react";
 
-interface Message {
+interface ContactMessage {
   _id: string;
   name: string;
   email: string;
@@ -14,189 +20,335 @@ interface Message {
   createdAt: string;
 }
 
-const filterTabs = ["all", "unread", "read"];
+type MessageFilter = "all" | "unread" | "read";
 
 export default function AdminMessagesPage() {
-  const t = useTranslations("adminMessages")
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null
+  );
+  const [filter, setFilter] = useState<MessageFilter>("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState<Message | null>(null);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/messages?filter=${filter}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMessages(data.messages || []);
-        setUnreadCount(data.unreadCount || 0);
+    async function loadMessages() {
+      try {
+        const response = await fetch("/api/admin/messages");
+
+        if (!response.ok) {
+          throw new Error("Unable to load messages");
+        }
+
+        const data = await response.json();
+        const receivedMessages = data.messages ?? [];
+
+        setMessages(receivedMessages);
+        setSelectedMessageId(receivedMessages[0]?._id ?? null);
+      } catch {
+        setMessages([]);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [filter]);
-
-  const markRead = async (messageId: string, read: boolean) => {
-    await fetch("/api/admin/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messageId, read }),
-    });
-
-    setMessages((prev) =>
-      prev.map((m) => (m._id === messageId ? { ...m, read } : m))
-    );
-
-    if (selected?._id === messageId) {
-      setSelected((prev) => prev ? { ...prev, read } : null);
+      }
     }
 
-    setUnreadCount((prev) => read ? prev - 1 : prev + 1);
-  };
+    loadMessages();
+  }, []);
 
-  const handleSelect = (msg: Message) => {
-    setSelected(msg);
-    if (!msg.read) markRead(msg._id, true);
-  };
+  const filteredMessages = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    return messages.filter((message) => {
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "unread" && !message.read) ||
+        (filter === "read" && message.read);
+
+      const matchesSearch = [
+        message.name,
+        message.email,
+        message.subject,
+        message.message,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [filter, messages, search]);
+
+  const selectedMessage =
+    messages.find((message) => message._id === selectedMessageId) ?? null;
+
+  const unreadCount = messages.filter((message) => !message.read).length;
+
+  async function updateMessageReadState(messageId: string, read: boolean) {
+    setUpdating(true);
+
+    try {
+      const response = await fetch("/api/admin/messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, read }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to update message");
+      }
+
+      setMessages((currentMessages) =>
+        currentMessages.map((message) =>
+          message._id === messageId ? { ...message, read } : message
+        )
+      );
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  function selectMessage(message: ContactMessage) {
+    setSelectedMessageId(message._id);
+
+    if (!message.read) {
+      updateMessageReadState(message._id, true);
+    }
+  }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+    <div>
+      <header className="flex flex-col gap-6 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
-          <p className="text-gray-500 mt-1">
-            {t("subtitle")}
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+            Support inbox
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A] sm:text-4xl">
+            Contact messages
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+            Review questions and requests submitted through the NexaPay contact
+            form.
           </p>
         </div>
-        {unreadCount > 0 && (
-          <span className="bg-blue-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
-            {unreadCount} {t("unread")}
-          </span>
-        )}
-      </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 mb-6">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => { setFilter(tab); setLoading(true); setSelected(null); }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
-              filter === tab
-                ? "bg-blue-500 text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {t(`filters.${tab}`)}
-            {tab === "unread" && unreadCount > 0 && (
-              <span className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+        <div className="border border-slate-200 bg-white px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Unread
+          </p>
+          <p className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-[#0A0A0A]">
+            {loading ? "—" : unreadCount}
+          </p>
+        </div>
+      </header>
 
-      <div className="flex gap-4">
-        {/* Messages list */}
-        <div className="w-2/5 space-y-2">
-          {loading ? (
-            [...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse h-20" />
-            ))
-          ) : messages.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-100 p-10 text-center">
-              <Mail className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">{t("noMessages")}</p>
-            </div>
-          ) : (
-            messages.map((msg) => (
-              <div
-                key={msg._id}
-                onClick={() => handleSelect(msg)}
-                className={`bg-white rounded-xl border p-4 cursor-pointer transition ${
-                  selected?._id === msg._id
-                    ? "border-blue-300 ring-2 ring-blue-100"
-                    : "border-gray-100 hover:border-gray-200"
+      <section className="mt-8 overflow-hidden border border-slate-200 bg-white">
+        <div className="flex flex-col gap-4 border-b border-slate-200 p-5 md:flex-row">
+          <label className="relative block flex-1">
+            <span className="sr-only">Search messages</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              className="h-10 w-full border border-slate-300 bg-white pl-10 pr-3 text-sm text-[#0A0A0A] outline-none placeholder:text-slate-400 focus:border-[#1E6FFF]"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search name, email, subject, or message"
+              value={search}
+            />
+          </label>
+
+          <div className="flex border border-slate-300 bg-white p-1">
+            {(
+              [
+                ["all", "All"],
+                ["unread", "Unread"],
+                ["read", "Read"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                className={`h-8 px-3 text-xs font-semibold transition-colors ${
+                  filter === value
+                    ? "bg-[#0A0A0A] text-white"
+                    : "text-slate-500 hover:text-[#0A0A0A]"
                 }`}
+                key={value}
+                onClick={() => setFilter(value)}
+                type="button"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {msg.read
-                      ? <MailOpen className="w-4 h-4 text-gray-300 shrink-0" />
-                      : <Mail className="w-4 h-4 text-blue-500 shrink-0" />
-                    }
-                    <div className="min-w-0">
-                      <p className={`text-sm truncate ${!msg.read ? "font-semibold text-zinc-900" : "text-zinc-700"}`}>
-                        {msg.name}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">{msg.subject}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-400 shrink-0">
-                    {new Date(msg.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <p className="text-xs text-gray-400 mt-2 truncate">{msg.message}</p>
-              </div>
-            ))
-          )}
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Message detail */}
-        <div className="flex-1">
-          {selected ? (
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
-              {/* Message header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-zinc-900">{selected.subject}</h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {t("from")} <span className="font-medium text-zinc-700">{selected.name}</span>
-                    {" · "}
-                    <a href={`mailto:${selected.email}`} className="text-blue-500 hover:underline">
-                      {selected.email}
-                    </a>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(selected.createdAt).toLocaleString()}
-                  </p>
+        <div className="grid min-h-[580px] lg:grid-cols-[360px_minmax(0,1fr)]">
+          <aside className="border-b border-slate-200 lg:border-b-0 lg:border-r">
+            {loading &&
+              Array.from({ length: 7 }).map((_, index) => (
+                <div
+                  className="border-b border-slate-200 p-5"
+                  key={index}
+                >
+                  <div className="h-4 w-32 animate-pulse bg-slate-100" />
+                  <div className="mt-3 h-3 w-48 animate-pulse bg-slate-100" />
+                  <div className="mt-4 h-3 w-full animate-pulse bg-slate-100" />
                 </div>
-                <div className="flex gap-2">
+              ))}
+
+            {!loading && filteredMessages.length === 0 && (
+              <div className="p-8 text-center text-sm text-slate-500">
+                No messages match this view.
+              </div>
+            )}
+
+            {!loading &&
+              filteredMessages.map((message) => {
+                const selected = message._id === selectedMessageId;
+
+                return (
                   <button
-                    onClick={() => markRead(selected._id, !selected.read)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition"
+                    className={`block w-full border-b border-slate-200 p-5 text-left transition-colors ${
+                      selected
+                        ? "bg-slate-50"
+                        : "bg-white hover:bg-slate-50"
+                    }`}
+                    key={message._id}
+                    onClick={() => selectMessage(message)}
+                    type="button"
                   >
-                    {selected.read
-                      ? <><Mail className="w-3.5 h-3.5" /> {t("markUnread")}</>
-                      : <><MailOpen className="w-3.5 h-3.5" />{t("markRead")}</>
-                    }
+                    <div className="flex items-start justify-between gap-3">
+                      <p
+                        className={`truncate text-sm ${
+                          message.read
+                            ? "font-medium text-slate-700"
+                            : "font-semibold text-[#0A0A0A]"
+                        }`}
+                      >
+                        {message.name}
+                      </p>
+                      {!message.read && (
+                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#1E6FFF]" />
+                      )}
+                    </div>
+
+                    <p className="mt-1 truncate text-xs text-slate-500">
+                      {message.subject || "No subject"}
+                    </p>
+                    <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-500">
+                      {message.message}
+                    </p>
+                    <p className="mt-3 text-xs text-slate-400">
+                      {formatDate(message.createdAt)}
+                    </p>
                   </button>
-                  <a
-                    href={`mailto:${selected.email}?subject=Re: ${selected.subject}`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-lg text-xs font-medium text-white transition"
+                );
+              })}
+          </aside>
+
+          <div className="p-6 sm:p-8">
+            {!selectedMessage && !loading && (
+              <div className="flex h-full min-h-80 flex-col items-center justify-center text-center">
+                <span className="flex size-11 items-center justify-center bg-slate-100 text-slate-500">
+                  <MessageSquareText className="size-5" />
+                </span>
+                <h2 className="mt-5 text-xl font-semibold tracking-[-0.03em] text-[#0A0A0A]">
+                  Select a message
+                </h2>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                  Choose a message from the inbox to view its complete details.
+                </p>
+              </div>
+            )}
+
+            {selectedMessage && (
+              <article>
+                <div className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+                      Contact request
+                    </p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#0A0A0A]">
+                      {selectedMessage.subject || "No subject"}
+                    </h2>
+                  </div>
+
+                  <button
+                    className="inline-flex h-9 items-center gap-2 border border-slate-300 bg-white px-3 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] disabled:opacity-50"
+                    disabled={updating}
+                    onClick={() =>
+                      updateMessageReadState(
+                        selectedMessage._id,
+                        !selectedMessage.read
+                      )
+                    }
+                    type="button"
                   >
-                    {t("reply")}
-                  </a>
+                    {selectedMessage.read ? (
+                      <>
+                        <Mail className="size-4" />
+                        Mark unread
+                      </>
+                    ) : (
+                      <>
+                        <CheckCheck className="size-4" />
+                        Mark read
+                      </>
+                    )}
+                  </button>
                 </div>
-              </div>
 
-              {/* Divider */}
-              <div className="border-t border-gray-100 mb-6" />
+                <div className="mt-6 grid gap-4 border border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      From
+                    </p>
+                    <p className="mt-2 font-semibold text-[#0A0A0A]">
+                      {selectedMessage.name}
+                    </p>
+                    <a
+                      className="mt-1 inline-block text-sm text-[#1E6FFF] hover:text-[#175ED8]"
+                      href={`mailto:${selectedMessage.email}`}
+                    >
+                      {selectedMessage.email}
+                    </a>
+                  </div>
 
-              {/* Message body */}
-              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {selected.message}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border border-gray-100 p-10 text-center h-full flex flex-col items-center justify-center">
-              <Mail className="w-10 h-10 text-gray-200 mb-3" />
-              <p className="text-gray-400 text-sm">{t("selectMessage")}</p>
-            </div>
-          )}
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                      Received
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {formatDate(selectedMessage.createdAt)}
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-xs text-slate-500">
+                      {selectedMessage.read ? (
+                        <MailOpen className="size-3.5" />
+                      ) : (
+                        <Clock3 className="size-3.5" />
+                      )}
+                      {selectedMessage.read ? "Read" : "Unread"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    Message
+                  </p>
+                  <div className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                    {selectedMessage.message}
+                  </div>
+                </div>
+              </article>
+            )}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }

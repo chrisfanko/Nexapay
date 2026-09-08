@@ -1,175 +1,398 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { Search } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ChevronLeft,
+  ChevronRight,
+  CircleX,
+  Clock3,
+  Search,
+  SlidersHorizontal,
+  CheckCircle2,
+} from "lucide-react";
+
+type TransactionStatus = "complete" | "failed" | "pending";
 
 interface Transaction {
   _id: string;
   reference: string;
-  status: "complete" | "failed" | "pending";
-  channel: string;
   provider: string;
-  grossAmount: number;
-  nexapayFee: number;
-  netAmount: number;
+  channel: string;
+  status: TransactionStatus;
   currency: string;
+  grossAmount: number;
+  merchantAmount: number;
+  nexapayFee: number;
   customerName: string;
   customerPhone?: string;
   createdAt: string;
 }
 
-const statusColors = {
-  complete: "bg-green-100 text-green-700",
-  failed: "bg-red-100 text-red-700",
-  pending: "bg-yellow-100 text-yellow-700",
-};
+interface TransactionsResponse {
+  transactions: Transaction[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
 
-const statusEmoji = {
-  complete: "✅",
-  failed: "❌",
-  pending: "⏳",
+const statusStyles: Record<TransactionStatus, string> = {
+  complete: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  failed: "border-red-200 bg-red-50 text-red-800",
+  pending: "border-amber-200 bg-amber-50 text-amber-800",
 };
 
 export default function AdminTransactionsPage() {
-  const t = useTranslations("adminTransactions");
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [total, setTotal] = useState(0);
+  const [data, setData] = useState<TransactionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("all");
+  const [provider, setProvider] = useState("all");
   const [channel, setChannel] = useState("all");
   const [search, setSearch] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedSearch, setSubmittedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [fetchTrigger, setFetchTrigger] = useState(0);
 
   useEffect(() => {
-    const params = new URLSearchParams({ status, channel, search: searchQuery, page: String(page), limit: "20" });
-    fetch(`/api/admin/transactions?${params}`)
-      .then((res) => res.json())
-      .then((data) => { setTransactions(data.transactions || []); setTotal(data.total || 0); setTotalPages(data.totalPages || 1); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [status, channel, searchQuery, page, fetchTrigger]);
+    const controller = new AbortController();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+    async function loadTransactions() {
+      setLoading(true);
+
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "20",
+      });
+
+      if (status !== "all") params.set("status", status);
+      if (provider !== "all") params.set("provider", provider);
+      if (channel !== "all") params.set("channel", channel);
+      if (submittedSearch) params.set("search", submittedSearch);
+
+      try {
+        const response = await fetch(`/api/admin/transactions?${params}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to load transactions");
+        }
+
+        setData(await response.json());
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setData(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadTransactions();
+
+    return () => controller.abort();
+  }, [channel, page, provider, status, submittedSearch]);
+
+  function resetFilters() {
+    setStatus("all");
+    setProvider("all");
+    setChannel("all");
+    setSearch("");
+    setSubmittedSearch("");
     setPage(1);
-    setSearchQuery(search);
-    setLoading(true);
-    setFetchTrigger((n) => n + 1);
-  };
+  }
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmittedSearch(search.trim());
+    setPage(1);
+  }
+
+  const hasFilters =
+    status !== "all" ||
+    provider !== "all" ||
+    channel !== "all" ||
+    submittedSearch.length > 0;
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-zinc-900">{t("title")}</h1>
-        <p className="text-gray-500 mt-2">{total} {t("subtitle")}</p>
-      </div>
+    <div>
+      <header className="flex flex-col gap-6 border-b border-slate-200 pb-8 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+            Payments
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A] sm:text-4xl">
+            Transaction activity
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+            Review payments processed across all merchants and payment methods.
+          </p>
+        </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-center">
-        <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 min-w-48">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="border border-slate-200 bg-white px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Total records
+          </p>
+          <p className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-[#0A0A0A]">
+            {loading ? "—" : formatNumber(data?.total ?? 0)}
+          </p>
+        </div>
+      </header>
+
+      <section className="mt-8 border border-slate-200 bg-white">
+        <form
+          className="grid gap-4 border-b border-slate-200 p-5 lg:grid-cols-[minmax(0,1fr)_150px_150px_180px_auto]"
+          onSubmit={handleSearchSubmit}
+        >
+          <label className="relative block">
+            <span className="sr-only">Search transactions</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
-              type="text"
-              placeholder={t("searchPlaceholder")}
+              className="h-10 w-full border border-slate-300 bg-white pl-10 pr-3 text-sm text-[#0A0A0A] outline-none transition-colors placeholder:text-slate-400 focus:border-[#1E6FFF]"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by transaction reference"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition">
-            {t("search")}
+          </label>
+
+          <FilterSelect
+            label="Status"
+            onChange={(value) => {
+              setStatus(value);
+              setPage(1);
+            }}
+            options={[
+              { label: "All statuses", value: "all" },
+              { label: "Completed", value: "complete" },
+              { label: "Failed", value: "failed" },
+              { label: "Pending", value: "pending" },
+            ]}
+            value={status}
+          />
+
+          <FilterSelect
+            label="Provider"
+            onChange={(value) => {
+              setProvider(value);
+              setPage(1);
+            }}
+            options={[
+              { label: "All providers", value: "all" },
+              { label: "NotchPay", value: "notchpay" },
+              { label: "PayPal", value: "paypal" },
+            ]}
+            value={provider}
+          />
+
+          <FilterSelect
+            label="Channel"
+            onChange={(value) => {
+              setChannel(value);
+              setPage(1);
+            }}
+            options={[
+              { label: "All channels", value: "all" },
+              { label: "Orange Money", value: "Orange Money" },
+              { label: "MTN Mobile Money", value: "MTN Mobile Money" },
+              { label: "PayPal", value: "PayPal" },
+              { label: "Visa", value: "Visa" },
+              { label: "Mastercard", value: "Mastercard" },
+            ]}
+            value={channel}
+          />
+
+          <button
+            className="inline-flex h-10 items-center justify-center gap-2 bg-[#0A0A0A] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1E6FFF]"
+            type="submit"
+          >
+            <SlidersHorizontal className="size-4" />
+            Apply
           </button>
         </form>
 
-        <select title={t("allStatus")} value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); setLoading(true); }}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="all">{t("allStatus")}</option>
-          <option value="complete">{t("complete")}</option>
-          <option value="failed">{t("failed")}</option>
-          <option value="pending">{t("pending")}</option>
-        </select>
+        {hasFilters && (
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
+            <p className="text-sm text-slate-500">Filtered transaction results</p>
+            <button
+              className="text-sm font-semibold text-[#1E6FFF] transition-colors hover:text-[#175ED8]"
+              onClick={resetFilters}
+              type="button"
+            >
+              Reset filters
+            </button>
+          </div>
+        )}
 
-        <select title={t("allChannels")} value={channel}
-          onChange={(e) => { setChannel(e.target.value); setPage(1); setLoading(true); }}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="all">{t("allChannels")}</option>
-          <option value="Orange Money">Orange Money</option>
-          <option value="MTN Mobile Money">MTN Mobile Money</option>
-          <option value="PayPal">PayPal</option>
-          <option value="Visa">Visa</option>
-          <option value="Mastercard">Mastercard</option>
-        </select>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.reference")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.customer")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.channel")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.gross")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.fee")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.net")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.status")}</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">{t("table.date")}</th>
+          <table className="w-full min-w-[980px] text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50">
+              <tr className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                <th className="px-5 py-4">Reference</th>
+                <th className="px-5 py-4">Customer</th>
+                <th className="px-5 py-4">Provider</th>
+                <th className="px-5 py-4">Channel</th>
+                <th className="px-5 py-4">Amount</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i}>{[...Array(8)].map((_, j) => (<td key={j} className="px-4 py-3"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>))}</tr>
-                ))
-              ) : transactions.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400">{t("noTransactions")}</td></tr>
-              ) : (
-                transactions.map((tx) => (
-                  <tr key={tx._id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{tx.reference.slice(0, 20)}...</td>
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-zinc-900">{tx.customerName}</p>
-                      {tx.customerPhone && <p className="text-xs text-gray-400">{tx.customerPhone}</p>}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{tx.channel}</td>
-                    <td className="px-4 py-3 font-medium text-zinc-900">{(tx.grossAmount ?? 0).toLocaleString()} {tx.currency}</td>
-                    <td className="px-4 py-3 text-green-600 font-medium">{(tx.nexapayFee ?? 0).toLocaleString()} {tx.currency}</td>
-                    <td className="px-4 py-3 text-zinc-900">{(tx.netAmount ?? 0).toLocaleString()} {tx.currency}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColors[tx.status]}`}>
-                        {statusEmoji[tx.status]} {tx.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">{new Date(tx.createdAt).toLocaleDateString()}</td>
+
+            <tbody className="divide-y divide-slate-200">
+              {loading &&
+                Array.from({ length: 7 }).map((_, index) => (
+                  <tr key={index}>
+                    {Array.from({ length: 7 }).map((__, cellIndex) => (
+                      <td className="px-5 py-5" key={cellIndex}>
+                        <div className="h-4 animate-pulse bg-slate-100" />
+                      </td>
+                    ))}
                   </tr>
-                ))
+                ))}
+
+              {!loading && data?.transactions.length === 0 && (
+                <tr>
+                  <td
+                    className="px-5 py-16 text-center text-sm text-slate-500"
+                    colSpan={7}
+                  >
+                    No transactions match the selected filters.
+                  </td>
+                </tr>
               )}
+
+              {!loading &&
+                data?.transactions.map((transaction) => (
+                  <tr
+                    className="transition-colors hover:bg-slate-50"
+                    key={transaction._id}
+                  >
+                    <td className="px-5 py-4 font-mono text-xs text-slate-600">
+                      {truncateReference(transaction.reference)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-[#0A0A0A]">
+                        {transaction.customerName || "Unknown customer"}
+                      </p>
+                      {transaction.customerPhone && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {transaction.customerPhone}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 capitalize text-slate-600">
+                      {transaction.provider}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {transaction.channel}
+                    </td>
+                    <td className="px-5 py-4 font-semibold text-[#0A0A0A]">
+                      {formatNumber(transaction.grossAmount)}{" "}
+                      {transaction.currency}
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge status={transaction.status} />
+                    </td>
+                    <td className="px-5 py-4 text-xs text-slate-500">
+                      {formatDate(transaction.createdAt)}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">{t("page")} {page} {t("of")} {totalPages}</p>
+        <footer className="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            {!loading && data
+              ? `Page ${data.page} of ${Math.max(data.totalPages, 1)}`
+              : "Loading transactions"}
+          </p>
+
           <div className="flex gap-2">
-            <button onClick={() => { setPage((p) => Math.max(1, p - 1)); setLoading(true); }} disabled={page === 1}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition">
-              {t("previous")}
+            <button
+              className="inline-flex h-9 items-center gap-1.5 border border-slate-300 bg-white px-3 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!data || data.page <= 1 || loading}
+              onClick={() => setPage((currentPage) => currentPage - 1)}
+              type="button"
+            >
+              <ChevronLeft className="size-4" />
+              Previous
             </button>
-            <button onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setLoading(true); }} disabled={page === totalPages}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition">
-              {t("next")}
+            <button
+              className="inline-flex h-9 items-center gap-1.5 border border-slate-300 bg-white px-3 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={
+                !data || data.page >= data.totalPages || data.totalPages === 0 || loading
+              }
+              onClick={() => setPage((currentPage) => currentPage + 1)}
+              type="button"
+            >
+              Next
+              <ChevronRight className="size-4" />
             </button>
           </div>
-        </div>
-      )}
+        </footer>
+      </section>
     </div>
   );
+}
+
+function FilterSelect({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: { label: string; value: string }[];
+  value: string;
+}) {
+  return (
+    <label>
+      <span className="sr-only">{label}</span>
+      <select
+        className="h-10 w-full border border-slate-300 bg-white px-3 text-sm text-slate-600 outline-none transition-colors focus:border-[#1E6FFF] focus:text-[#0A0A0A]"
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function StatusBadge({ status }: { status: TransactionStatus }) {
+  const Icon =
+    status === "complete"
+      ? CheckCircle2
+      : status === "failed"
+        ? CircleX
+        : Clock3;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] ${statusStyles[status]}`}
+    >
+      <Icon className="size-3" />
+      {status}
+    </span>
+  );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat().format(value ?? 0);
+}
+
+function truncateReference(reference: string) {
+  return reference.length > 24 ? `${reference.slice(0, 24)}…` : reference;
 }

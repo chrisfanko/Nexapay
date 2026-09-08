@@ -1,10 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { TrendingUp, CheckCircle, XCircle, Clock, ArrowLeftRight, FlaskConical, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeftRight,
+  CheckCircle2,
+  CircleX,
+  Clock3,
+  FlaskConical,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
 interface Stats {
   totalTransactions: number;
@@ -26,16 +35,10 @@ interface Stats {
   }[];
 }
 
-const statusColors = {
-  complete: "bg-green-100 text-green-700",
-  failed: "bg-red-100 text-red-700",
-  pending: "bg-yellow-100 text-yellow-700",
-};
-
-const statusEmoji = {
-  complete: "✅",
-  failed: "❌",
-  pending: "⏳",
+const statusStyles = {
+  complete: "border-green-200 bg-green-50 text-green-800",
+  failed: "border-red-200 bg-red-50 text-red-800",
+  pending: "border-amber-200 bg-amber-50 text-amber-800",
 };
 
 export default function DashboardPage() {
@@ -46,181 +49,254 @@ export default function DashboardPage() {
   const [mode, setMode] = useState<"live" | "test">("live");
 
   useEffect(() => {
+    
+
     fetch(`/api/dashboard/stats?mode=${mode}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      .then((response) => response.json())
+      .then((data) => setStats(data))
+      .catch(() => setStats(null))
+      .finally(() => setLoading(false));
   }, [mode]);
 
   const handleModeChange = (newMode: "live" | "test") => {
-    setMode(newMode);
-    setLoading(true);
-    setStats(null);
-  };
+  if (newMode === mode) return;
+
+  setLoading(true);
+  setMode(newMode);
+};
 
   const statCards = [
     {
       label: t("stats.totalVolume"),
-      value: stats ? `${stats.totalVolume.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} XAF` : "—",
-      icon: <TrendingUp className="w-5 h-5 text-blue-500" />,
-      bg: "bg-blue-50",
+      value: stats ? `${formatNumber(stats.totalVolume)} XAF` : "—",
+      icon: TrendingUp,
+      iconClassName: "text-[#1E6FFF]",
     },
     {
       label: t("stats.totalTransactions"),
       value: stats?.totalTransactions ?? "—",
-      icon: <ArrowLeftRight className="w-5 h-5 text-purple-500" />,
-      bg: "bg-purple-50",
+      icon: ArrowLeftRight,
+      iconClassName: "text-[#0A0A0A]",
     },
     {
       label: t("stats.successful"),
       value: stats?.successfulTransactions ?? "—",
-      icon: <CheckCircle className="w-5 h-5 text-green-500" />,
-      bg: "bg-green-50",
+      icon: CheckCircle2,
+      iconClassName: "text-green-700",
     },
     {
       label: t("stats.failed"),
       value: stats?.failedTransactions ?? "—",
-      icon: <XCircle className="w-5 h-5 text-red-500" />,
-      bg: "bg-red-50",
+      icon: CircleX,
+      iconClassName: "text-red-700",
     },
     {
       label: t("stats.pending"),
       value: stats?.pendingTransactions ?? "—",
-      icon: <Clock className="w-5 h-5 text-yellow-500" />,
-      bg: "bg-yellow-50",
+      icon: Clock3,
+      iconClassName: "text-amber-700",
     },
     {
       label: t("stats.successRate"),
       value: stats ? `${stats.successRate}%` : "—",
-      icon: <TrendingUp className="w-5 h-5 text-blue-500" />,
-      bg: "bg-blue-50",
+      icon: TrendingUp,
+      iconClassName: "text-[#1E6FFF]",
     },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <header className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-8 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-3xl font-black text-zinc-900">
-            {t("welcome")} {session?.user?.name} 👋
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+            Merchant workspace
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A] sm:text-4xl">
+            {t("welcome")} {session?.user?.name}
           </h1>
-          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-500">{t("subtitle")}</p>
         </div>
 
-        {/* TEST / LIVE toggle */}
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1">
-          <button
-            onClick={() => handleModeChange("test")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-              mode === "test"
-                ? "bg-amber-100 text-amber-700"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-          >
-            <FlaskConical className="w-4 h-4" />
-            {t("test")}
-          </button>
-          <button
-            onClick={() => handleModeChange("live")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-              mode === "live"
-                ? "bg-green-100 text-green-700"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-          >
-            <Zap className="w-4 h-4" />
-            {t("live")}
-          </button>
-        </div>
-      </div>
+        <ModeSwitch mode={mode} onChange={handleModeChange} t={t} />
+      </header>
 
-      {/* Mode banner */}
       {mode === "test" && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2 text-sm text-amber-700">
-          <FlaskConical className="w-4 h-4 shrink-0" />
-          {t("modeBanner")} <strong className="mx-1">{t("testTransactions")}</strong> {t("noRealMoney")}
+        <div className="mt-6 flex gap-3 border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+          <FlaskConical className="mt-0.5 size-4 shrink-0" />
+          <p>
+            {t("modeBanner")} <strong>{t("testTransactions")}</strong>{" "}
+            {t("noRealMoney")}
+          </p>
         </div>
       )}
 
-      {/* Stat Cards */}
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm animate-pulse h-28" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-          {statCards.map((card) => (
-            <div key={card.label} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-              <div className={`w-10 h-10 ${card.bg} rounded-xl flex items-center justify-center mb-3`}>
-                {card.icon}
-              </div>
-              <p className="text-2xl font-black text-zinc-900">{card.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{card.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      <section className="mt-8">
+        <div className="grid border-l border-t border-slate-200 bg-white sm:grid-cols-2 xl:grid-cols-3">
+          {loading
+            ? Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  className="min-h-40 border-b border-r border-slate-200 p-6"
+                  key={index}
+                >
+                  <div className="size-5 animate-pulse bg-slate-100" />
+                  <div className="mt-8 h-8 w-24 animate-pulse bg-slate-100" />
+                  <div className="mt-3 h-4 w-32 animate-pulse bg-slate-100" />
+                </div>
+              ))
+            : statCards.map((card) => {
+                const Icon = card.icon;
 
-      {/* Recent Transactions */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-zinc-900">{t("recentTransactions")}</h2>
-          <Link href="/dashboard/transactions" className="text-sm text-blue-500 font-medium hover:text-blue-700 transition">
+                return (
+                  <article
+                    className="min-h-40 border-b border-r border-slate-200 p-6"
+                    key={card.label}
+                  >
+                    <Icon className={`size-5 ${card.iconClassName}`} />
+                    <p className="mt-8 text-3xl font-semibold tracking-[-0.045em] text-[#0A0A0A]">
+                      {card.value}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">{card.label}</p>
+                  </article>
+                );
+              })}
+        </div>
+      </section>
+
+      <section className="mt-10 border border-slate-200 bg-white">
+        <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1E6FFF]">
+              Activity
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-[#0A0A0A]">
+              {t("recentTransactions")}
+            </h2>
+          </div>
+
+          <Link
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[#1E6FFF] transition-colors hover:text-[#175ED8]"
+            href="/dashboard/transactions"
+          >
             {t("viewAll")}
+            <ArrowRight className="size-4" />
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.reference")}</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.customer")}</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.channel")}</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.amount")}</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.status")}</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">{t("table.date")}</th>
+          <table className="w-full min-w-190 text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50">
+              <tr className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                <th className="px-5 py-4 sm:px-6">{t("table.reference")}</th>
+                <th className="px-5 py-4">{t("table.customer")}</th>
+                <th className="px-5 py-4">{t("table.channel")}</th>
+                <th className="px-5 py-4">{t("table.amount")}</th>
+                <th className="px-5 py-4">{t("table.status")}</th>
+                <th className="px-5 py-4 sm:px-6">{t("table.date")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {!stats?.recentTransactions?.length ? (
+
+            <tbody className="divide-y divide-slate-200">
+              {!loading && !stats?.recentTransactions?.length && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
+                  <td
+                    className="px-5 py-16 text-center text-sm text-slate-500 sm:px-6"
+                    colSpan={6}
+                  >
                     {t("noTransactions", { mode })}
                   </td>
                 </tr>
-              ) : (
-                stats.recentTransactions.map((tx) => (
-                  <tr key={tx._id} className="hover:bg-gray-50 transition">
-                    <td className="px-5 py-3 font-mono text-xs text-gray-600">
-                      {tx.reference.slice(0, 18)}...
-                    </td>
-                    <td className="px-5 py-3 text-zinc-900">{tx.customerName}</td>
-                    <td className="px-5 py-3 text-gray-600">{tx.channel}</td>
-                    <td className="px-5 py-3 font-medium text-zinc-900">
-                      {(tx.grossAmount ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} {tx.currency}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColors[tx.status]}`}>
-                        {statusEmoji[tx.status]} {tx.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">
-                      {new Date(tx.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
               )}
+
+              {stats?.recentTransactions.map((transaction) => (
+                <tr
+                  className="transition-colors hover:bg-slate-50"
+                  key={transaction._id}
+                >
+                  <td className="px-5 py-4 font-mono text-xs text-slate-600 sm:px-6">
+                    {truncateReference(transaction.reference)}
+                  </td>
+                  <td className="px-5 py-4 font-medium text-[#0A0A0A]">
+                    {transaction.customerName}
+                  </td>
+                  <td className="px-5 py-4 text-slate-600">
+                    {transaction.channel}
+                  </td>
+                  <td className="px-5 py-4 font-semibold text-[#0A0A0A]">
+                    {formatNumber(transaction.grossAmount)} {transaction.currency}
+                  </td>
+                  <td className="px-5 py-4">
+                    <StatusBadge status={transaction.status} />
+                  </td>
+                  <td className="px-5 py-4 text-xs text-slate-500 sm:px-6">
+                    {new Date(transaction.createdAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
+}
+
+function ModeSwitch({
+  mode,
+  onChange,
+  t,
+}: {
+  mode: "live" | "test";
+  onChange: (mode: "live" | "test") => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="inline-flex border border-slate-300 bg-white p-1">
+      <button
+        className={`inline-flex h-9 items-center gap-2 px-3 text-sm font-semibold transition-colors ${
+          mode === "test"
+            ? "bg-amber-50 text-amber-800"
+            : "text-slate-500 hover:text-[#0A0A0A]"
+        }`}
+        onClick={() => onChange("test")}
+        type="button"
+      >
+        <FlaskConical className="size-4" />
+        {t("test")}
+      </button>
+      <button
+        className={`inline-flex h-9 items-center gap-2 px-3 text-sm font-semibold transition-colors ${
+          mode === "live"
+            ? "bg-[#0A0A0A] text-white"
+            : "text-slate-500 hover:text-[#0A0A0A]"
+        }`}
+        onClick={() => onChange("live")}
+        type="button"
+      >
+        <Zap className={`size-4 ${mode === "live" ? "text-[#1E6FFF]" : ""}`} />
+        {t("live")}
+      </button>
+    </div>
+  );
+}
+
+function StatusBadge({
+  status,
+}: {
+  status: "complete" | "failed" | "pending";
+}) {
+  return (
+    <span
+      className={`inline-flex border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] ${statusStyles[status]}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat().format(value ?? 0);
+}
+
+function truncateReference(reference: string) {
+  return reference.length > 20 ? `${reference.slice(0, 20)}…` : reference;
 }

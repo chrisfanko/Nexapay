@@ -1,155 +1,176 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   ArrowLeftRight,
-  Users,
   Building2,
+  LayoutDashboard,
+  LogOut,
   Mail,
-  ArrowLeft,
-  Loader,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 
+const navigation = [
+  {
+    href: "/admin",
+    label: "Overview",
+    icon: LayoutDashboard,
+    exact: true,
+  },
+  {
+    href: "/admin/transactions",
+    label: "Transactions",
+    icon: ArrowLeftRight,
+  },
+  {
+    href: "/admin/merchants",
+    label: "Merchants",
+    icon: Users,
+  },
+  {
+    href: "/admin/businesses",
+    label: "Businesses",
+    icon: Building2,
+  },
+  {
+    href: "/admin/messages",
+    label: "Messages",
+    icon: Mail,
+  },
+];
+
 export default function AdminSidebar() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const pathname = usePathname();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const role = (session?.user as { role?: string })?.role;
-  const isAdmin = role === "admin";
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/sign-in");
-    } else if (status === "authenticated" && !isAdmin) {
-      router.push("/");
-    }
-  }, [status, isAdmin, router]);
-
-  // Fetch unread message count every 60 seconds
-  useEffect(() => {
-    if (!isAdmin) return;
-
-    const fetchUnread = () => {
-      fetch("/api/admin/messages?filter=unread")
-        .then((res) => res.json())
-        .then((data) => setUnreadCount(data.unreadCount || 0))
-        .catch(() => {});
-    };
-
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 60000);
-    return () => clearInterval(interval);
-  }, [isAdmin]);
-
-  const sidebarLinks = [
-    {
-      label: "Overview",
-      href: "/admin",
-      icon: <LayoutDashboard className="w-4 h-4" />,
-      badge: null,
-    },
-    {
-      label: "Transactions",
-      href: "/admin/transactions",
-      icon: <ArrowLeftRight className="w-4 h-4" />,
-      badge: null,
-    },
-    {
-      label: "Merchants",
-      href: "/admin/merchants",
-      icon: <Users className="w-4 h-4" />,
-      badge: null,
-    },
-    {
-      label: "Businesses",
-      href: "/admin/businesses",
-      icon: <Building2 className="w-4 h-4" />,
-      badge: null,
-    },
-    {
-      label: "Messages",
-      href: "/admin/messages",
-      icon: <Mail className="w-4 h-4" />,
-      badge: unreadCount > 0 ? unreadCount : null,
-    },
-  ];
-
-  if (status === "loading") {
-    return (
-      <aside className="w-64 bg-zinc-900 fixed h-full z-40 flex items-center justify-center">
-        <Loader className="w-6 h-6 animate-spin text-white" />
-      </aside>
-    );
-  }
-
-  if (!session || !isAdmin) return null;
+  const { data: session } = useSession();
 
   return (
-    <aside className="w-64 bg-zinc-900 flex flex-col fixed h-full z-40">
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-zinc-700">
-        <div className="inline-flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-black text-xs">N</span>
-          </div>
-          <span className="text-white font-bold text-lg tracking-tight">
-            Nexa<span className="text-blue-400">Pay</span>
+    <>
+      <header className="border-b border-slate-200 bg-white lg:hidden">
+        <div className="flex h-16 items-center justify-between px-5">
+          <Link className="flex items-center gap-2.5" href="/admin">
+            <span className="flex size-8 items-center justify-center bg-[#0A0A0A] text-xs font-extrabold text-white">
+              N
+            </span>
+            <span className="text-lg font-semibold tracking-[-0.03em] text-[#0A0A0A]">
+              Nexa<span className="text-[#1E6FFF]">Pay</span>
+            </span>
+          </Link>
+
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#1E6FFF]">
+            <ShieldCheck className="size-4" />
+            Admin
           </span>
         </div>
-        <p className="text-xs text-zinc-400 mt-1">Admin Portal</p>
-      </div>
 
-      {/* Nav Links */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
-        {sidebarLinks.map((link) => {
-          const isActive = pathname === link.href;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-500 text-white"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-              }`}
-            >
-              {link.icon}
-              <span className="flex-1">{link.label}</span>
-              {link.badge !== null && (
-                <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                  {link.badge > 99 ? "99+" : link.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+        <nav className="flex overflow-x-auto border-t border-slate-200 px-3">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const active = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
 
-      {/* Bottom */}
-      <div className="px-4 py-4 border-t border-zinc-700 space-y-3">
-        <div className="px-3 py-2 bg-zinc-800 rounded-lg">
-          <p className="text-xs text-zinc-500">Signed in as</p>
-          <p className="text-sm font-medium text-white truncate">
-            {session.user?.name}
-          </p>
-          <p className="text-xs text-zinc-500 truncate">
-            {session.user?.email}
-          </p>
+            return (
+              <Link
+                className={`inline-flex h-12 shrink-0 items-center gap-2 border-b-2 px-3 text-xs font-semibold transition-colors ${
+                  active
+                    ? "border-[#1E6FFF] text-[#1E6FFF]"
+                    : "border-transparent text-slate-500 hover:text-[#0A0A0A]"
+                }`}
+                href={item.href}
+                key={item.href}
+              >
+                <Icon className="size-3.5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </header>
+
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
+        <div className="flex h-20 items-center border-b border-slate-200 px-6">
+          <Link className="flex items-center gap-2.5" href="/admin">
+            <span className="flex size-9 items-center justify-center bg-[#0A0A0A] text-sm font-extrabold text-white">
+              N
+            </span>
+            <span className="text-lg font-semibold tracking-[-0.03em] text-[#0A0A0A]">
+              Nexa<span className="text-[#1E6FFF]">Pay</span>
+            </span>
+          </Link>
         </div>
-        <Link
-          href="/"
-          className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
-        </Link>
-      </div>
-    </aside>
+
+        <div className="border-b border-slate-200 px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1E6FFF]">
+            Platform console
+          </p>
+          <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#0A0A0A]">
+            <ShieldCheck className="size-4 text-[#1E6FFF]" />
+            Administrator
+          </div>
+        </div>
+
+        <nav className="flex-1 px-3 py-5">
+          <p className="px-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Workspace
+          </p>
+
+          <div className="mt-3 space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const active = item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  className={`flex h-10 items-center gap-3 px-3 text-sm font-semibold transition-colors ${
+                    active
+                      ? "bg-[#0A0A0A] text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-[#0A0A0A]"
+                  }`}
+                  href={item.href}
+                  key={item.href}
+                >
+                  <Icon
+                    className={`size-4 ${
+                      active ? "text-[#1E6FFF]" : "text-slate-400"
+                    }`}
+                  />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="border-t border-slate-200 p-3">
+          <div className="flex items-center gap-3 px-3 py-3">
+            <span className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-[#0A0A0A]">
+              {session?.user?.name?.slice(0, 1).toUpperCase() || "A"}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-[#0A0A0A]">
+                {session?.user?.name || "Administrator"}
+              </p>
+              <p className="truncate text-xs text-slate-500">
+                {session?.user?.email || "Admin account"}
+              </p>
+            </div>
+          </div>
+
+          <button
+            className="flex h-10 w-full items-center gap-3 px-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-700"
+            onClick={() => signOut({ callbackUrl: "/" })}
+            type="button"
+          >
+            <LogOut className="size-4" />
+            Sign out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

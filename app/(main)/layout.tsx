@@ -24,7 +24,7 @@ export default function MainLayout({
     <ClientSessionProvider>
       <Toaster />
       <Navbar />
-      <main className={`${geistSans.variable} ${geistMono.variable} pt-14`}>
+      <main className={`${geistSans.variable} ${geistMono.variable} pt-16`}>
         {children}
       </main>
       <Footer />

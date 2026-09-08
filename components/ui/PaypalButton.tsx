@@ -7,13 +7,19 @@ import { useRouter } from "next/navigation";
 interface PaypalButtonProps {
   amount?: string;
   currency?: string;
-  sessionId?: string;
+  customerEmail?: string;
+  customerName?: string;
+  customerPhone?: string;
   redirectUrl?: string;
+  sessionId?: string;
 }
 
 export default function PaypalButton({
   amount = "10.00",
   currency = "USD",
+  customerEmail,
+  customerName,
+  customerPhone,
   sessionId,
   redirectUrl,
 }: PaypalButtonProps) {
@@ -63,7 +69,11 @@ export default function PaypalButton({
                 : "/api/paypal/create-order";
 
               const body = sessionId
-                ? { sessionId, method: "paypal" }
+                ? { sessionId,
+                   method: "paypal",
+                   name: customerName,
+                   phone: customerPhone,
+                   email: customerEmail, }
                 : { amount, currency };
 
               const res = await fetch(endpoint, {

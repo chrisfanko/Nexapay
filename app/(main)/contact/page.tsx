@@ -1,42 +1,80 @@
 "use client";
 
+import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
+import {
+  CheckCircle2,
+  Handshake,
+  Headphones,
+  Loader2,
+  Mail,
+  Send,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
   const contactOptions = [
-    { icon: "💬", title: t("options.sales.title"), desc: t("options.sales.desc"), email: "sales@nexapay.com", color: "rgba(30,111,255,0.15)", border: "rgba(30,111,255,0.25)" },
-    { icon: "🛠️", title: t("options.support.title"), desc: t("options.support.desc"), email: "support@nexapay.com", color: "rgba(0,212,170,0.15)", border: "rgba(0,212,170,0.25)" },
-    { icon: "🤝", title: t("options.partners.title"), desc: t("options.partners.desc"), email: "partners@nexapay.com", color: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.25)" },
+    {
+      icon: Mail,
+      title: t("options.sales.title"),
+      description: t("options.sales.desc"),
+      email: "sales@nexapay.com",
+    },
+    {
+      icon: Headphones,
+      title: t("options.support.title"),
+      description: t("options.support.desc"),
+      email: "support@nexapay.com",
+    },
+    {
+      icon: Handshake,
+      title: t("options.partners.title"),
+      description: t("options.partners.desc"),
+      email: "partners@nexapay.com",
+    },
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setForm((currentForm) => ({
+      ...currentForm,
+      [event.target.name]: event.target.value,
+    }));
     setError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setLoading(true);
     setError("");
+
     try {
-      const res = await fetch("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok) {
+
+      const data = await response.json();
+
+      if (!response.ok) {
         setError(data.error || t("form.errorFallback"));
-        setLoading(false);
         return;
       }
+
       setSent(true);
     } catch {
       setError(t("form.errorNetwork"));
@@ -45,136 +83,259 @@ export default function ContactPage() {
     }
   };
 
+  const resetForm = () => {
+    setSent(false);
+    setError("");
+    setForm({ name: "", email: "", subject: "", message: "" });
+  };
+
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
-        .contact-page { font-family: 'DM Sans', sans-serif; background: #050A14; color: #fff; min-height: 100vh; overflow-x: hidden; }
-        .contact-hero { padding: 120px 5% 80px; text-align: center; position: relative; }
-        .contact-hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(30,111,255,0.14) 0%, transparent 70%); pointer-events: none; }
-        .contact-hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%); }
-        .contact-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.25); color: #00D4AA; font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 100px; margin-bottom: 28px; letter-spacing: 0.1em; text-transform: uppercase; }
-        .contact-title { font-family: 'Syne', sans-serif; font-size: clamp(40px, 6vw, 80px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 20px; }
-        .contact-subtitle { color: rgba(255,255,255,0.45); font-size: clamp(15px, 2vw, 18px); max-width: 500px; margin: 0 auto; line-height: 1.7; font-weight: 300; }
-        .options-section { padding: 60px 5%; max-width: 1000px; margin: 0 auto; }
-        .options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .option-card { border-radius: 20px; padding: 28px 24px; border: 1px solid; transition: all 0.3s; cursor: pointer; text-decoration: none; display: block; }
-        .option-card:hover { transform: translateY(-4px); }
-        .option-icon { font-size: 28px; margin-bottom: 14px; display: block; }
-        .option-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #fff; }
-        .option-desc { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 14px; line-height: 1.5; }
-        .option-email { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.6); font-family: monospace; }
-        .form-section { padding: 40px 5% 120px; max-width: 800px; margin: 0 auto; }
-        .form-container { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 48px; position: relative; overflow: hidden; }
-        .form-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #1E6FFF, #00D4AA, #1E6FFF); background-size: 200% 100%; animation: shimmer 3s ease-in-out infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .form-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
-        .form-subtitle { color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 36px; font-weight: 300; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 8px; letter-spacing: 0.02em; }
-        .form-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 13px 16px; border-radius: 12px; outline: none; transition: all 0.2s; box-sizing: border-box; }
-        .form-input:focus { border-color: rgba(30,111,255,0.5); background: rgba(30,111,255,0.05); box-shadow: 0 0 0 3px rgba(30,111,255,0.1); }
-        .form-input::placeholder { color: rgba(255,255,255,0.2); }
-        textarea.form-input { resize: none; min-height: 140px; }
-        .error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
-        .submit-btn { width: 100%; background: #1E6FFF; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 15px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
-        .submit-btn:hover:not(:disabled) { background: #3D8BFF; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(30,111,255,0.35); }
-        .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        .success-container { text-align: center; padding: 40px 0; }
-        .success-icon { width: 72px; height: 72px; background: rgba(0,212,170,0.15); border: 1px solid rgba(0,212,170,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 24px; animation: scaleIn 0.5s cubic-bezier(.16,1,.3,1); }
-        @keyframes scaleIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .success-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
-        .success-desc { color: rgba(255,255,255,0.45); font-size: 15px; max-width: 360px; margin: 0 auto 28px; line-height: 1.7; font-weight: 300; }
-        .reset-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .reset-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 768px) { .options-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } .form-container { padding: 32px 24px; } }
-      `}</style>
+    <main className="bg-white text-[#0A0A0A]">
+      <section className="border-b border-white/10 bg-[#0A0A0A] text-white">
+        <div className="mx-auto max-w-7xl px-6 py-24 text-center lg:px-8 lg:py-32">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+            {t("hero.tag")}
+          </p>
 
-      <div className="contact-page">
+          <h1 className="mt-6 text-5xl font-semibold tracking-[-0.06em] sm:text-6xl">
+            {t("hero.title1")}
+            <br />
+            <span className="text-[#1E6FFF]">{t("hero.title2")}</span>
+          </h1>
 
-        {/* Hero */}
-        <section className="contact-hero">
-          <div className="contact-hero-bg" />
-          <div className="contact-hero-grid" />
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <span className="contact-tag">{t("hero.tag")}</span>
-            <h1 className="contact-title">
-              {t("hero.title1")}<br />
-              <span style={{ color: "#1E6FFF" }}>{t("hero.title2")}</span>
-            </h1>
-            <p className="contact-subtitle">{t("hero.subtitle")}</p>
-          </div>
-        </section>
+          <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+            {t("hero.subtitle")}
+          </p>
+        </div>
+      </section>
 
-        {/* Contact Options */}
-        <section className="options-section">
-          <div className="options-grid">
-            {contactOptions.map((opt) => (
-              <a key={opt.title} href={`mailto:${opt.email}`} className="option-card" style={{ background: opt.color, borderColor: opt.border }}>
-                <span className="option-icon">{opt.icon}</span>
-                <div className="option-title">{opt.title}</div>
-                <div className="option-desc">{opt.desc}</div>
-                <div className="option-email">{opt.email}</div>
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
+        <div className="grid border-l border-t border-slate-200 md:grid-cols-3">
+          {contactOptions.map((option) => {
+            const Icon = option.icon;
+
+            return (
+              <a
+                key={option.email}
+                href={`mailto:${option.email}`}
+                className="group border-b border-r border-slate-200 p-6 transition-colors hover:bg-slate-50 sm:p-7"
+              >
+                <div className="flex size-10 items-center justify-center rounded-lg bg-blue-50 text-[#1E6FFF]">
+                  <Icon className="size-5" />
+                </div>
+
+                <h2 className="mt-8 text-lg font-semibold tracking-[-0.025em]">
+                  {option.title}
+                </h2>
+
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  {option.description}
+                </p>
+
+                <p className="mt-6 font-mono text-xs text-[#1E6FFF]">
+                  {option.email}
+                </p>
               </a>
-            ))}
-          </div>
-        </section>
+            );
+          })}
+        </div>
+      </section>
 
-        {/* Form */}
-        <section className="form-section">
-          <div className="form-container">
+      <section className="border-t border-slate-200 bg-slate-50">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:px-8 lg:py-28">
+          <div className="max-w-md">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1E6FFF]">
+              Contact NexaPay
+            </p>
+
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
+              Tell us how we can help.
+            </h2>
+
+            <p className="mt-5 text-base leading-7 text-slate-600">
+              Send us a message and the right NexaPay team will get back to you
+              as soon as possible.
+            </p>
+          </div>
+
+          <div className="border border-slate-200 bg-white p-6 sm:p-8">
             {sent ? (
-              <div className="success-container">
-                <div className="success-icon">✓</div>
-                <h3 className="success-title">{t("success.title")}</h3>
-                <p className="success-desc">{t("success.desc")}</p>
-                <button className="reset-btn" onClick={() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }); }}>
+              <div className="py-8 text-center sm:py-12">
+                <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-blue-50 text-[#1E6FFF]">
+                  <CheckCircle2 className="size-6" />
+                </div>
+
+                <h2 className="mt-6 text-2xl font-semibold tracking-[-0.035em]">
+                  {t("success.title")}
+                </h2>
+
+                <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-500">
+                  {t("success.desc")}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="mt-7 inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] hover:bg-slate-50"
+                >
                   {t("success.reset")}
                 </button>
               </div>
             ) : (
               <>
-                <h2 className="form-title">{t("form.title")}</h2>
-                <p className="form-subtitle">{t("form.subtitle")}</p>
-                <form onSubmit={handleSubmit}>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">{t("form.name")} *</label>
-                      <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="John Doe" required className="form-input" />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">{t("form.email")} *</label>
-                      <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="john@company.com" required className="form-input" />
-                    </div>
+                <h2 className="text-2xl font-semibold tracking-[-0.035em]">
+                  {t("form.title")}
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {t("form.subtitle")}
+                </p>
+
+                <form onSubmit={handleSubmit} className="mt-8">
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <FormField
+                      id="contact-name"
+                      label={t("form.name")}
+                      required
+                    >
+                      <input
+                        id="contact-name"
+                        name="name"
+                        type="text"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                        autoComplete="name"
+                        className={inputClassName}
+                      />
+                    </FormField>
+
+                    <FormField
+                      id="contact-email"
+                      label={t("form.email")}
+                      required
+                    >
+                      <input
+                        id="contact-email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                        autoComplete="email"
+                        className={inputClassName}
+                      />
+                    </FormField>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">{t("form.subject")} *</label>
-                    <select name="subject" value={form.subject} onChange={handleChange} required title="Select a subject" className="form-input">
-                      <option value="">{t("form.subjectPlaceholder")}</option>
-                      <option value="Sales Inquiry">{t("form.subjectOptions.sales")}</option>
-                      <option value="Technical Support">{t("form.subjectOptions.support")}</option>
-                      <option value="Partnership">{t("form.subjectOptions.partnership")}</option>
-                      <option value="Billing">{t("form.subjectOptions.billing")}</option>
-                      <option value="Other">{t("form.subjectOptions.other")}</option>
-                    </select>
+
+                  <div className="mt-5">
+                    <FormField
+                      id="contact-subject"
+                      label={t("form.subject")}
+                      required
+                    >
+                      <select
+                        id="contact-subject"
+                        name="subject"
+                        value={form.subject}
+                        onChange={handleChange}
+                        required
+                        className={inputClassName}
+                      >
+                        <option value="">{t("form.subjectPlaceholder")}</option>
+                        <option value="Sales Inquiry">
+                          {t("form.subjectOptions.sales")}
+                        </option>
+                        <option value="Technical Support">
+                          {t("form.subjectOptions.support")}
+                        </option>
+                        <option value="Partnership">
+                          {t("form.subjectOptions.partnership")}
+                        </option>
+                        <option value="Billing">
+                          {t("form.subjectOptions.billing")}
+                        </option>
+                        <option value="Other">
+                          {t("form.subjectOptions.other")}
+                        </option>
+                      </select>
+                    </FormField>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">{t("form.message")} *</label>
-                    <textarea name="message" value={form.message} onChange={handleChange} placeholder={t("form.messagePlaceholder")} required className="form-input" />
+
+                  <div className="mt-5">
+                    <FormField
+                      id="contact-message"
+                      label={t("form.message")}
+                      required
+                    >
+                      <textarea
+                        id="contact-message"
+                        name="message"
+                        value={form.message}
+                        onChange={handleChange}
+                        required
+                        rows={6}
+                        placeholder={t("form.messagePlaceholder")}
+                        className={`${inputClassName} resize-y`}
+                      />
+                    </FormField>
                   </div>
-                  {error && <div className="error-box">{error}</div>}
-                  <button type="submit" disabled={loading} className="submit-btn">
-                    {loading ? (<><div className="spinner" />{t("form.sending")}</>) : t("form.submit")}
+
+                  {error && (
+                    <p
+                      role="alert"
+                      className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    >
+                      {error}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#1E6FFF] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#175ed8] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        {t("form.sending")}
+                      </>
+                    ) : (
+                      <>
+                        {t("form.submit")}
+                        <Send className="size-4" />
+                      </>
+                    )}
                   </button>
                 </form>
               </>
             )}
           </div>
-        </section>
-      </div>
-    </>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+const inputClassName =
+  "mt-2 block w-full border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-[#0A0A0A] outline-none transition-colors placeholder:text-slate-400 focus:border-[#1E6FFF] focus:ring-2 focus:ring-blue-100";
+
+function FormField({
+  id,
+  label,
+  required = false,
+  children,
+}: {
+  id: string;
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+      {label}
+      {required && <span className="text-[#1E6FFF]"> *</span>}
+      {children}
+    </label>
   );
 }
